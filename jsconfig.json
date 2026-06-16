@@ -1,0 +1,18 @@
+ {
+    "compilerOptions": {
+        "composite": true,
+        "types": [
+            "vite/client"
+        ],
+        "sourceMap": true,
+        "module": "ESNext",
+        "ignoreDeprecations": "6.0",
+        "moduleResolution": "node",
+        "target": "ESNext",
+        "jsx": "preserve",
+    },
+    "exclude": [
+        "node_modules",
+        "**/node_modules/*"
+    ]
+} 
