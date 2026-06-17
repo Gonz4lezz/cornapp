@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "nodemon --watch src/**/* -e js,jsx,ts,tsx,json,html --exec vite",
+    "start": "nodemon --watch \"src/**/*\" -e js,jsx,ts,tsx,json,html --exec vite",
     "prettier": "npx prettier src test --check",
     "prettier:fix": "npm run prettier -- --write",
     "dev": "vite",
