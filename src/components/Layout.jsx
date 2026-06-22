@@ -42,7 +42,7 @@ function Layout({ children }) {
 
       <footer className="footer">
         <div className="footer-container">
-          <p>&copy; 2026 CornApp — DEVSHARKS. Todos los derechos reservados.</p>
+          <p>&copy; 2026 CornApp — DEVSHARKS</p>
         </div>
       </footer>
     </>
