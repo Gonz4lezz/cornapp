@@ -1,18 +1,8 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+##INSTRUCCIONES PROFESOR:
 
-Currently, two official plugins are available:
+ -- En la carpeta database se pueden encontrar 2 scripts: el de creación de tablas (cornapp_bd.sql) y el de inserción de datos (seed_data.sql). Para crear la base de datos, se deben ejecutar ambos scripts en orden.
+ -- Ejecutar 'npm install' si 'npm run start' no funciona primeramente.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+ Link de github del proyecto: 
+ https://github.com/Gonz4lezz/cornapp

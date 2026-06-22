@@ -21,17 +21,17 @@ function HomePage() {
       <section className="features-section">
         <div className="features-container">
           <div className="feature-card">
-            <span className="feature-icon">🌽</span>
+            <span className="feature-icon">★</span>
             <h3>Corn Dogs Artesanales</h3>
             <p>Masa de maíz dulce preparada diariamente con receta coreana original.</p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">🧀</span>
+            <span className="feature-icon">★</span>
             <h3>Variedad de Sabores</h3>
             <p>Desde el clásico hasta combinaciones con queso, chocolate y más.</p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">🚀</span>
+            <span className="feature-icon">★</span>
             <h3>Rápido y Fresco</h3>
             <p>Preparados al momento para que disfrutes la mejor textura y sabor.</p>
           </div>
