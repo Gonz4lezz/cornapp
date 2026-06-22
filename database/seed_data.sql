@@ -49,26 +49,34 @@ INSERT INTO tarifa_envio (nombre, tarifa_base, precio_por_km, distancia_maxima_k
 -- ============================================================
 
 INSERT INTO ingrediente (nombre, descripcion, precio_extra, es_alergeno) VALUES
-    ('Masa de maíz',         'Masa de maíz dulce estilo coreano',                    NULL,    FALSE),
+('Masa de maíz',         'Masa de maíz dulce estilo coreano',                         NULL,    FALSE),
     ('Salchicha americana',  'Salchicha tipo hot dog premium',                        NULL,    FALSE),
     ('Queso mozzarella',     'Queso mozzarella derretido',                            500.00,  TRUE),
     ('Azúcar',               'Azúcar blanca para cobertura',                          NULL,    FALSE),
-    ('Aceite vegetal',       'Aceite para fritura profunda',                           NULL,    FALSE),
+    ('Aceite vegetal',       'Aceite para fritura profunda',                           NULL,    FALSE), --5
     ('Ketchup',              'Salsa de tomate',                                       NULL,    FALSE),
     ('Mostaza',              'Mostaza amarilla americana',                            NULL,    FALSE),
     ('Papas',                'Papas cortadas estilo french fries',                    NULL,    FALSE),
     ('Sal',                  'Sal de mesa',                                           NULL,    FALSE),
-    ('Chocolate',            'Chocolate derretido para cobertura',                    300.00,  TRUE),
+    ('Chocolate',            'Chocolate derretido para cobertura',                    300.00,  TRUE), --10
     ('Maple syrup',          'Jarabe de maple canadiense',                            400.00,  FALSE),
     ('Cheddar',              'Queso cheddar rallado',                                 500.00,  TRUE),
     ('Tocino',               'Tocino crujiente desmenuzado',                          600.00,  FALSE),
     ('Jalapeño',             'Chile jalapeño en rodajas',                             200.00,  FALSE),
-    ('Leche',                'Leche entera para batidos',                             NULL,    TRUE),
+    ('Leche',                'Leche entera para batidos',                             NULL,    TRUE), --15
     ('Helado de vainilla',   'Helado artesanal de vainilla',                          NULL,    TRUE),
     ('Café',                 'Café molido premium',                                   NULL,    FALSE),
     ('Panko',                'Pan rallado japonés para cobertura crujiente',          NULL,    TRUE),
-    ('Salchicha coreana',    'Salchicha estilo coreano con especias',                 NULL,    FALSE),
-    ('Miel',                 'Miel de abeja natural',                                 300.00,  FALSE);
+    ('Salchicha coreana',    'Salchicha estilo coreano con especias',                 NULL,    FALSE), 
+    ('Miel',                 'Miel de abeja',                                         500.00,  TRUE), --20
+    ('Tomate',               'Tomate',                                                500.00,  TRUE), --20
+    ('tostadas',             'Tortillas de maíz tostadas',                            600.00,  FALSE),
+    ('Brócoli',              'Brócoli',                                               200.00,  TRUE),
+    ('Queso Turrialba',      'Queso turrialba',                                       NULL,    TRUE),
+    ('Pollo',                'Trocitos de pollo',                                     NULL,    TRUE),
+    ('Carne',                'Carne Desmechada',                                      NULL,    FALSE), --25
+    ('Leche',                'Leche',                                                 NULL,    TRUE),
+    ('Queso Amarillo',       'Salsa de Queso Amarillo Americano',                     NULL,    TRUE);
 
 -- ============================================================
 -- PRODUCTOS (más de 3 por categoría para variedad)
@@ -88,14 +96,17 @@ INSERT INTO producto (id_categoria, nombre, descripcion, precio_base, tiempo_pre
     (2, 'Papas Fritas Clásicas',   'Papas fritas doradas y crujientes con sal marina. El acompañamiento perfecto.',                                                 1500.00, 6,  TRUE),
     (2, 'Papas con Cheddar',       'Papas fritas bañadas en salsa de queso cheddar fundido y tocino crujiente.',                                                    2200.00, 8,  TRUE),
     (2, 'Aros de Cebolla',         'Aros de cebolla empanizados con panko japonés, fritos hasta quedar crujientes.',                                                1800.00, 7,  TRUE),
-    (2, 'Nuggets de Pollo',        'Nuggets de pechuga de pollo empanizados, acompañados de salsa BBQ.',                                                            2500.00, 8,  TRUE);
+    (2, 'Papas Fritas Con Queso Derretido',        'Papas fritas bañadas en salsa de queso cheddar fundido y tocino crujiente.',                                    2500.00, 8,  TRUE),
+    (2, 'Sopa De Tomate',         'Deliciosa sopa de tomate casera acompañada con tostadas.',                                                                       1800.00, 7,  TRUE),
+    (2, 'Sopa De Brócoli',        'Deliciosa sopa de brócoli casera acompañada con queso turrialba..',                                                                  2500.00, 8,  TRUE),
+    (2, 'Papas Supremas', 'Papas fritas doradas y crujientes con sal marina. Bañadas en queso mozzarela derretido y queso amarillo. ¡Elige tu opción de proteína entre pollo, carne o mixta!',                                    2500.00, 8,  TRUE);
 
 -- Categoría 3: Bebidas
 INSERT INTO producto (id_categoria, nombre, descripcion, precio_base, tiempo_preparacion, disponible) VALUES
     (3, 'Limonada Natural',        'Limonada fresca preparada al momento con limones naturales y un toque de menta.',                                                1200.00, 3,  TRUE),
     (3, 'Milkshake de Vainilla',   'Batido cremoso de helado de vainilla artesanal con leche fresca.',                                                               2000.00, 5,  TRUE),
-    (3, 'Café Americano',          'Café americano preparado con granos premium de tueste medio.',                                                                    1000.00, 3,  TRUE),
-    (3, 'Té Helado de Durazno',    'Té negro helado con jarabe natural de durazno. Refrescante y dulce.',                                                            1300.00, 3,  TRUE);
+    (3, 'Refresco',          'Botella de 750ml.',                                                                                                                    1000.00, 3,  TRUE),
+    (3, 'Té Frio',    'Botella de 750ml.',                                                                                                                           1300.00, 3,  TRUE);
 
 -- ============================================================
 -- PRODUCTO_INGREDIENTE (relaciones)
@@ -152,11 +163,10 @@ INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_pr
     (7, 9, FALSE),  -- Sal
     (7, 5, FALSE);  -- Aceite vegetal
 
--- Papas con Cheddar (id_producto = 8)
+-- Papas con Queso Derretido (id_producto = 8)
 INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_principal) VALUES
     (8, 8, TRUE),   -- Papas
     (8, 12, TRUE),  -- Cheddar
-    (8, 13, FALSE), -- Tocino
     (8, 5, FALSE);  -- Aceite vegetal
 
 -- Aros de Cebolla (id_producto = 9)
@@ -164,10 +174,10 @@ INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_pr
     (9, 18, TRUE),  -- Panko
     (9, 5, FALSE);  -- Aceite vegetal
 
--- Nuggets de Pollo (id_producto = 10)
+-- Sopa de Tomate (id_producto = 10)
 INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_principal) VALUES
-    (10, 18, TRUE), -- Panko
-    (10, 5, FALSE); -- Aceite vegetal
+    (10, 21, TRUE), -- Tomate
+    (10, 22, FALSE); -- Tostadas
 
 -- Limonada Natural (id_producto = 11)
 INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_principal) VALUES
@@ -178,14 +188,28 @@ INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_pr
     (12, 15, TRUE),  -- Leche
     (12, 16, TRUE);  -- Helado de vainilla
 
--- Café Americano (id_producto = 13)
+-- Refresco (id_producto = 13)
 INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_principal) VALUES
-    (13, 17, TRUE);  -- Café
+    (13, 4, False);  -- Azúcar
 
--- Té Helado de Durazno (id_producto = 14)
+-- Té Frío (id_producto = 14)
 INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_principal) VALUES
     (14, 4, FALSE);  -- Azúcar
 
+-- Sopa de Brócoli (id_producto = 15)
+INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_principal) VALUES
+    (15, 23, TRUE);  -- Brócoli
+    (15, 14, TRUE);  -- Leche
+    (15, 24, TRUE);  -- Queso Turrialba
+
+-- Papas Supremas (id_producto = 16)
+INSERT INTO producto_ingrediente (id_producto, id_ingrediente, es_ingrediente_principal) VALUES
+    (16, 25, TRUE);  -- Pollo
+    (16, 26, TRUE);  -- Carne
+    (16, 8, FALSE);  -- Papas
+    (16, 3, FALSE);  -- Queso Mozzarela
+    (16, 27, FALSE);  -- Queso Amarillo
+    
 -- ============================================================
 -- IMÁGENES DE PRODUCTOS (URLs placeholder)
 -- ============================================================
@@ -253,8 +277,7 @@ INSERT INTO imagen_combo (id_combo, url_imagen, texto_alt, es_principal) VALUES
 INSERT INTO menu (nombre, descripcion, esta_activo) VALUES
     ('Menú del Día',           'Nuestro menú principal disponible de lunes a sábado.',                  TRUE),
     ('Menú de Fin de Semana',  'Menú especial con combos exclusivos para sábado y domingo.',            TRUE),
-    ('Menú Happy Hour',        'Promociones especiales en bebidas y snacks de 3:00 pm a 6:00 pm.',      TRUE),
-    ('Menú Navideño',          'Menú especial navideño con sabores de temporada.',                      FALSE);
+    ('Menú Happy Hour',        'Promociones especiales en bebidas y snacks de 3:00 pm a 6:00 pm.',      TRUE);
 
 -- Horarios del Menú del Día (lunes a viernes, 10am-9pm)
 INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
@@ -277,10 +300,6 @@ INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
     (3, 3, '15:00:00', '18:00:00'),
     (3, 4, '15:00:00', '18:00:00'),
     (3, 5, '15:00:00', '18:00:00');
-
--- Horarios del Menú Navideño (24-26 dic, 5pm-10pm)
-INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin, fecha_inicio, fecha_fin) VALUES
-    (4, NULL, '17:00:00', '22:00:00', '2026-12-24', '2026-12-26');
 
 -- Productos en Menú del Día
 INSERT INTO menu_producto (id_menu, id_producto, orden_display) VALUES
@@ -340,23 +359,6 @@ INSERT INTO menu_producto (id_menu, id_producto, orden_display) VALUES
 -- Combos en Happy Hour
 INSERT INTO menu_combo (id_menu, id_combo, orden_display) VALUES
     (3, 4, 1);   -- Combo Snack
-
--- Productos en Menú Navideño
-INSERT INTO menu_producto (id_menu, id_producto, orden_display) VALUES
-    (4, 1, 1),
-    (4, 2, 2),
-    (4, 3, 3),
-    (4, 4, 4),
-    (4, 5, 5),
-    (4, 7, 1),
-    (4, 8, 2),
-    (4, 11, 1),
-    (4, 12, 2);
-
-INSERT INTO menu_combo (id_menu, id_combo, orden_display) VALUES
-    (4, 1, 1),
-    (4, 2, 2),
-    (4, 3, 3);
 
 -- ============================================================
 -- PROCESOS DE PREPARACIÓN (ejemplos con 1, 2 y 3 estaciones)
