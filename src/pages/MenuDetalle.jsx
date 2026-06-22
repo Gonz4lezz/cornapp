@@ -87,7 +87,7 @@ function MenuDetalle() {
                       {prod.imagen ? (
                         <img src={prod.imagen} alt={prod.nombre} />
                       ) : (
-                        <span>🌽</span>
+                        <span></span>
                       )}
                     </div>
                     <div className="menu-det-item-info">
@@ -108,7 +108,7 @@ function MenuDetalle() {
                       {combo.imagen ? (
                         <img src={combo.imagen} alt={combo.nombre} />
                       ) : (
-                        <span>🎁</span>
+                        <span></span>
                       )}
                     </div>
                     <div className="menu-det-item-info">

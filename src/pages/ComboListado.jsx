@@ -42,7 +42,7 @@ function ComboListado() {
                 {combo.imagen ? (
                   <img src={combo.imagen} alt={combo.nombre} />
                 ) : (
-                  <div className="combo-card-placeholder">🎁</div>
+                  <div className="combo-card-placeholder"></div>
                 )}
                 <span className="combo-card-badge">Combo</span>
               </div>

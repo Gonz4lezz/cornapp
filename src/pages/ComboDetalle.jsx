@@ -41,7 +41,7 @@ function ComboDetalle() {
             {imagenPrincipal ? (
               <img src={imagenPrincipal.url_imagen} alt={imagenPrincipal.texto_alt || combo.nombre} />
             ) : (
-              <div className="detalle-imagen-placeholder">🎁</div>
+              <div className="detalle-imagen-placeholder"></div>
             )}
           </div>
 
@@ -65,7 +65,7 @@ function ComboDetalle() {
                         {prod.imagen ? (
                           <img src={prod.imagen} alt={prod.nombre} />
                         ) : (
-                          <span>🌽</span>
+                          <span></span>
                         )}
                       </div>
                       <div className="combo-producto-info">

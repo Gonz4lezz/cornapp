@@ -19,7 +19,7 @@ class ProductoModel
                 FROM producto p
                 INNER JOIN categoria c ON p.id_categoria = c.id_categoria
                 WHERE p.esta_activo = 1
-                ORDER BY p.nombre ASC";
+                ORDER BY c.orden_display ASC, c.nombre ASC, p.nombre ASC";
         return $this->db->executeSQL($sql);
     }
 

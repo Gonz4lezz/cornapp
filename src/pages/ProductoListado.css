@@ -1,3 +1,17 @@
+.productos-por-categoria {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.producto-categoria-titulo {
+  font-size: 1.5rem;
+  color: var(--tertiary);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--secondary);
+}
+
 .productos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));

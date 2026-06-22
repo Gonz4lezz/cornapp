@@ -41,7 +41,7 @@ function ProductoDetalle() {
             {imagenPrincipal ? (
               <img src={imagenPrincipal.url_imagen} alt={imagenPrincipal.texto_alt || producto.nombre} />
             ) : (
-              <div className="detalle-imagen-placeholder">🌽</div>
+              <div className="detalle-imagen-placeholder"></div>
             )}
           </div>
 
