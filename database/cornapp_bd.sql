@@ -1,8 +1,3 @@
--- ============================================================
--- CORN APP - Base de Datos Fusionada (Lo mejor de ambas)
--- Motor: MySQL 8.0+
--- Equipo: DEVSHARKS
--- ============================================================
 
 CREATE DATABASE IF NOT EXISTS cornapp
   CHARACTER SET utf8mb4
@@ -35,7 +30,7 @@ CREATE TABLE usuario (
     contrasena_hash         VARCHAR(255) NOT NULL,      -- 255 caracteres para almacenar hash bcrypt/argon2
     correo_verificado_en    TIMESTAMP    NULL,
     esta_activo             BOOLEAN      NOT NULL DEFAULT TRUE,
-    es_frecuente            BOOLEAN      NOT NULL DEFAULT FALSE,  -- Tomado de compañeros: indica cliente frecuente para promociones
+    es_frecuente            BOOLEAN      NOT NULL DEFAULT FALSE,  
     creado_en               TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     editado_en              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_usuario),
@@ -87,9 +82,9 @@ CREATE TABLE ingrediente (
     id_ingrediente INT          NOT NULL AUTO_INCREMENT,
     nombre         VARCHAR(100) NOT NULL,
     descripcion    TEXT,
-    precio_extra   DECIMAL(10,2) DEFAULT NULL,          -- Tomado de compañeros: precio extra por ingrediente
+    precio_extra   DECIMAL(10,2) DEFAULT NULL,          
     es_alergeno    BOOLEAN      NOT NULL DEFAULT FALSE,
-    esta_activo    BOOLEAN      NOT NULL DEFAULT TRUE,   -- Tomado de compañeros: bandera de activo
+    esta_activo    BOOLEAN      NOT NULL DEFAULT TRUE,  
     creado_en      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     editado_en     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_ingrediente),
@@ -103,8 +98,8 @@ CREATE TABLE producto (
     descripcion         TEXT,
     precio_base         DECIMAL(10,2) NOT NULL,
     tiempo_preparacion  INT           NOT NULL DEFAULT 0,
-    disponible          BOOLEAN       NOT NULL DEFAULT TRUE,   -- Tomado de compañeros: si hay ingredientes para hacerlo
-    esta_activo         BOOLEAN       NOT NULL DEFAULT TRUE,   -- Tomado de compañeros: si el producto sigue vigente
+    disponible          BOOLEAN       NOT NULL DEFAULT TRUE, 
+    esta_activo         BOOLEAN       NOT NULL DEFAULT TRUE,  
     creado_en           TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     editado_en          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_producto),
@@ -374,7 +369,7 @@ CREATE TABLE seguimiento_pedido (
     id_pedido               INT         NOT NULL,
     id_estado               INT         NOT NULL,
     cambiado_por_usuario_id INT         NULL,
-    comentario              VARCHAR(200) NULL,           -- Tomado de compañeros: comentario por cada transición
+    comentario              VARCHAR(200) NULL,        
     cambiado_en             TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_seguimiento),
     CONSTRAINT fk_seguimiento_pedido_pedido  FOREIGN KEY (id_pedido)               REFERENCES pedido       (id_pedido) ON DELETE CASCADE,
@@ -427,7 +422,7 @@ CREATE TABLE cupon (
     monto_minimo_pedido     DECIMAL(10,2) NULL,
     limite_usos             INT           NULL,
     cantidad_usos           INT           NOT NULL DEFAULT 0,
-    permite_otra_promocion  BOOLEAN       NOT NULL DEFAULT FALSE,  -- Tomado de compañeros: si se puede combinar
+    permite_otra_promocion  BOOLEAN       NOT NULL DEFAULT FALSE,  
     fecha_inicio            DATETIME      NOT NULL,
     fecha_fin               DATETIME      NOT NULL,
     esta_activo             BOOLEAN       NOT NULL DEFAULT TRUE,
