@@ -279,7 +279,7 @@ INSERT INTO imagen_combo (id_combo, url_imagen, texto_alt, es_principal) VALUES
 INSERT INTO menu (nombre, descripcion, esta_activo) VALUES
     ('Menú del Día',           'Nuestro menú principal disponible de lunes a sábado.',                  TRUE),
     ('Menú de Fin de Semana',  'Menú especial con combos exclusivos para sábado y domingo.',            TRUE),
-    ('Menú Desayuno',        'Nuestros produtos para el desayuno, de 10:00 am a 12:00 pm.',      TRUE);
+    ('Menú Desayuno',        'Nuestros produtos para el desayuno, de 08:00 am a 10:00 am.',      TRUE);
 
 -- Horarios del Menú del Día (lunes a viernes, 10am-9pm)
 INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
@@ -295,13 +295,13 @@ INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
     (2, 6, '11:00:00', '22:00:00'),  -- Sábado
     (2, 0, '11:00:00', '22:00:00');  -- Domingo
 
--- Horarios del Menú Desayuno (lunes a viernes, 10am-12pm)
+-- Horarios del Menú Desayuno (lunes a viernes, 08am-10am)
 INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
-    (3, 1, '10:00:00', '12:00:00'),
-    (3, 2, '10:00:00', '12:00:00'),
-    (3, 3, '10:00:00', '12:00:00'),
-    (3, 4, '10:00:00', '12:00:00'),
-    (3, 5, '08:00:00', '11:00:00');
+    (3, 1, '08:00:00', '10:00:00'),
+    (3, 2, '08:00:00', '10:00:00'),
+    (3, 3, '08:00:00', '10:00:00'),
+    (3, 4, '08:00:00', '10:00:00'),
+    (3, 5, '08:00:00', '10:00:00');
 
 -- Productos en Menú del Día
 INSERT INTO menu_producto (id_menu, id_producto, orden_display) VALUES
