@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { productoService } from '../services/api';
+import { productoService, resolveImageUrl } from '../services/api';
+import { formatoMoneda } from '../utils/format';
 import './ProductoListado.css';
 
 function ProductoListado() {
@@ -51,7 +52,7 @@ function ProductoListado() {
                   >
                     <div className="producto-card-img">
                       {producto.imagen ? (
-                        <img src={producto.imagen} alt={producto.nombre} />
+                        <img src={resolveImageUrl(producto.imagen)} alt={producto.nombre} />
                       ) : (
                         <div className="producto-card-placeholder">🌽</div>
                       )}
@@ -65,7 +66,7 @@ function ProductoListado() {
                           : producto.descripcion}
                       </p>
                       <span className="producto-card-precio">
-                        ₡{Number(producto.precio_base).toLocaleString('es-CR')}
+                        {formatoMoneda(producto.precio_base)}
                       </span>
                     </div>
                   </Link>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { productoService } from '../services/api';
+import { productoService, resolveImageUrl } from '../services/api';
+import { formatoMoneda } from '../utils/format';
 import './ProductoDetalle.css';
 
 function ProductoDetalle() {
@@ -39,16 +40,17 @@ function ProductoDetalle() {
         <div className="detalle-layout">
           <div className="detalle-imagen">
             {imagenPrincipal ? (
-              <img src={imagenPrincipal.url_imagen} alt={imagenPrincipal.texto_alt || producto.nombre} />
+              <img
+                src={resolveImageUrl(imagenPrincipal.url_imagen)}
+                alt={imagenPrincipal.texto_alt || producto.nombre}
+              />
             ) : (
               <div className="detalle-imagen-placeholder"></div>
             )}
           </div>
 
           <div className="detalle-info">
-            <div className="detalle-precio">
-              ₡{Number(producto.precio_base).toLocaleString('es-CR')}
-            </div>
+            <div className="detalle-precio">{formatoMoneda(producto.precio_base)}</div>
 
             <div className="detalle-seccion">
               <h3>Descripción</h3>
