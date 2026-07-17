@@ -3,23 +3,27 @@
 class Response
 {
     private $status = 200;
+    private $statusExplicito = false;
 
     public function status(int $code)
     {
         $this->status = $code;
+        $this->statusExplicito = true;
         return $this;
     }
-    
-    public function toJSON($response = [],$message="")
+
+    public function toJSON($response = [], $message = "")
     {
-        //Verificar respuesta
-        if (isset($response) && !empty($response)) {
+        if ($response !== null) {
             $json = $response;
         } else {
-            $this->status =400;
-            $json =  $message ?? "No se efectuo la solicitud";
+            if (!$this->statusExplicito) {
+                $this->status = 400;
+            }
+            $json = $message !== "" ? $message : "No se efectuó la solicitud";
         }
-        //Escribir respuesta JSON con código de estado HTTP
+
+        // Escribir respuesta JSON con código de estado HTTP
         echo json_encode(
             $json,
             http_response_code($this->status)
