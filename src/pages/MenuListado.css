@@ -180,6 +180,13 @@
 .menu-card-desc {
   color: var(--text-light);
   font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.menu-card-fechas {
+  color: var(--secondary-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
   margin-bottom: 12px;
 }
 

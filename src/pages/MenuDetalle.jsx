@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { menuService } from '../services/api';
+import { menuService, resolveImageUrl } from '../services/api';
+import { formatoMoneda, formatoFecha, formatoHora } from '../utils/format';
 import './MenuDetalle.css';
-
-const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 function MenuDetalle() {
   const { id } = useParams();
@@ -12,7 +11,8 @@ function MenuDetalle() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    menuService.getById(id)
+    menuService
+      .getById(id)
       .then((res) => {
         setMenu(res.data);
         setLoading(false);
@@ -54,20 +54,22 @@ function MenuDetalle() {
       </div>
 
       <div className="page-content">
-        {menu.horarios && menu.horarios.length > 0 && (
+        {menu.fecha_inicio && menu.hora_inicio && (
           <div className="menu-detalle-horarios">
             <h3>Disponibilidad</h3>
             <div className="horarios-grid">
-              {menu.horarios.map((h) => (
-                <div key={h.id_horario} className="horario-item">
-                  <span className="horario-dia">
-                    {h.dia_semana !== null ? diasSemana[h.dia_semana] : `${h.fecha_inicio} al ${h.fecha_fin}`}
-                  </span>
-                  <span className="horario-horas">
-                    {h.hora_inicio?.substring(0, 5)} - {h.hora_fin?.substring(0, 5)}
-                  </span>
-                </div>
-              ))}
+              <div className="horario-item">
+                <span className="horario-dia">Fechas</span>
+                <span className="horario-horas">
+                  {formatoFecha(menu.fecha_inicio)} – {formatoFecha(menu.fecha_fin)}
+                </span>
+              </div>
+              <div className="horario-item">
+                <span className="horario-dia">Horario</span>
+                <span className="horario-horas">
+                  {formatoHora(menu.hora_inicio)} – {formatoHora(menu.hora_fin)}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -85,16 +87,14 @@ function MenuDetalle() {
                   >
                     <div className="menu-det-item-img">
                       {prod.imagen ? (
-                        <img src={prod.imagen} alt={prod.nombre} />
+                        <img src={resolveImageUrl(prod.imagen)} alt={prod.nombre} />
                       ) : (
                         <span></span>
                       )}
                     </div>
                     <div className="menu-det-item-info">
                       <span className="menu-det-item-nombre">{prod.nombre}</span>
-                      <span className="menu-det-item-precio">
-                        ₡{Number(prod.precio_base).toLocaleString('es-CR')}
-                      </span>
+                      <span className="menu-det-item-precio">{formatoMoneda(prod.precio_base)}</span>
                     </div>
                   </Link>
                 ))}
@@ -106,7 +106,7 @@ function MenuDetalle() {
                   >
                     <div className="menu-det-item-img">
                       {combo.imagen ? (
-                        <img src={combo.imagen} alt={combo.nombre} />
+                        <img src={resolveImageUrl(combo.imagen)} alt={combo.nombre} />
                       ) : (
                         <span></span>
                       )}
@@ -116,9 +116,7 @@ function MenuDetalle() {
                         {combo.nombre}
                         <span className="menu-det-combo-tag">Combo</span>
                       </span>
-                      <span className="menu-det-item-precio">
-                        ₡{Number(combo.precio_combo).toLocaleString('es-CR')}
-                      </span>
+                      <span className="menu-det-item-precio">{formatoMoneda(combo.precio_combo)}</span>
                     </div>
                   </Link>
                 ))}

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { menuService } from '../services/api';
+import { formatoMoneda, formatoFecha, formatoHora } from '../utils/format';
 import './MenuListado.css';
-
-const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 function MenuListado() {
   const [menus, setMenus] = useState([]);
@@ -12,10 +11,7 @@ function MenuListado() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    Promise.all([
-      menuService.getAll(),
-      menuService.getDisponible()
-    ])
+    Promise.all([menuService.getAll(), menuService.getDisponible()])
       .then(([menusRes, dispRes]) => {
         setMenus(menusRes.data || []);
         if (dispRes.data && dispRes.data.disponible !== false) {
@@ -58,11 +54,18 @@ function MenuListado() {
               >
                 <div className="menu-card-header">
                   <h3>{menu.nombre}</h3>
-                  <span className={`menu-card-estado ${menu.esta_activo == 1 ? 'activo' : 'inactivo'}`}>
+                  <span
+                    className={`menu-card-estado ${menu.esta_activo == 1 ? 'activo' : 'inactivo'}`}
+                  >
                     {menu.esta_activo == 1 ? 'Activo' : 'Inactivo'}
                   </span>
                 </div>
                 <p className="menu-card-desc">{menu.descripcion}</p>
+                {menu.fecha_inicio && menu.fecha_fin && (
+                  <p className="menu-card-fechas">
+                    {formatoFecha(menu.fecha_inicio)} – {formatoFecha(menu.fecha_fin)}
+                  </p>
+                )}
                 <div className="menu-card-footer">
                   <span className="menu-card-items">{menu.total_items} items</span>
                   <span className="menu-card-ver">Ver detalle &rarr;</span>
@@ -95,23 +98,15 @@ function MenuDisponibleView({ menu }) {
     });
   }
 
-  const formatHorarios = (horarios) => {
-    if (!horarios || horarios.length === 0) return '';
-    return horarios.map((h) => {
-      const dia = h.dia_semana !== null ? diasSemana[h.dia_semana] : '';
-      const fecha = h.fecha_inicio ? `${h.fecha_inicio} al ${h.fecha_fin}` : '';
-      const horas = `${h.hora_inicio?.substring(0, 5)} - ${h.hora_fin?.substring(0, 5)}`;
-      return dia ? `${dia}: ${horas}` : `${fecha}: ${horas}`;
-    }).join(' | ');
-  };
-
   return (
     <div className="menu-restaurante">
       <div className="menu-restaurante-header">
         <h3>{menu.nombre}</h3>
         <p className="menu-restaurante-desc">{menu.descripcion}</p>
-        {menu.horarios && menu.horarios.length > 0 && (
-          <p className="menu-restaurante-horario">{formatHorarios(menu.horarios)}</p>
+        {menu.fecha_inicio && menu.hora_inicio && (
+          <p className="menu-restaurante-horario">
+            Disponible del {formatoFecha(menu.fecha_inicio)} al {formatoFecha(menu.fecha_fin)} · {formatoHora(menu.hora_inicio)} a {formatoHora(menu.hora_fin)}
+          </p>
         )}
       </div>
 
@@ -127,9 +122,7 @@ function MenuDisponibleView({ menu }) {
                   <span className="menu-item-nombre">{prod.nombre}</span>
                   <span className="menu-item-dots"></span>
                 </div>
-                <span className="menu-item-precio">
-                  ₡{Number(prod.precio_base).toLocaleString('es-CR')}
-                </span>
+                <span className="menu-item-precio">{formatoMoneda(prod.precio_base)}</span>
               </div>
             ))}
 
@@ -142,9 +135,7 @@ function MenuDisponibleView({ menu }) {
                   </span>
                   <span className="menu-item-dots"></span>
                 </div>
-                <span className="menu-item-precio">
-                  ₡{Number(combo.precio_combo).toLocaleString('es-CR')}
-                </span>
+                <span className="menu-item-precio">{formatoMoneda(combo.precio_combo)}</span>
               </div>
             ))}
           </div>
