@@ -323,10 +323,11 @@ INSERT INTO imagen_combo (id_combo, url_imagen, texto_alt, es_principal) VALUES
 -- MENÚS
 -- ============================================================
 
-INSERT INTO menu (nombre, descripcion, esta_activo) VALUES
-    ('Menú del Día',           'Nuestro menú principal disponible de lunes a sábado.',                  TRUE),
-    ('Menú de Fin de Semana',  'Menú especial con combos exclusivos para sábado y domingo.',            TRUE),
-    ('Menú Desayuno',        'Menú ideal para comenzar tu día con energía. De 8:00 am a 10:00 am.',      TRUE);
+INSERT INTO menu (nombre, descripcion, fecha_inicio, fecha_fin, hora_inicio, hora_fin, esta_activo) VALUES
+    ('Menú del Día',          'Nuestro menú principal disponible durante toda la temporada regular.', '2026-01-01', '2026-12-31', '10:00:00', '21:00:00', TRUE),
+    ('Menú de Fin de Semana', 'Menú especial con combos exclusivos para los fines de semana.',        '2026-01-01', '2026-12-31', '11:00:00', '22:00:00', TRUE),
+    ('Menú Desayuno',         'Menú ideal para comenzar tu día con energía, disponible de 8am a 10am.', '2026-01-01', '2026-12-31', '08:00:00', '10:00:00', TRUE),
+    ('Menú Feria del Maíz',   'Menú temático de la Feria del Maíz de julio, disponible por tiempo limitado.', '2026-07-01', '2026-07-31', '10:00:00', '22:00:00', TRUE);
 
 -- Horarios Menú del Día (lun-sáb 10am-9pm)
 INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
@@ -371,11 +372,20 @@ INSERT INTO menu_combo (id_menu, id_combo, orden_display) VALUES
 
 -- Productos Menú Desayuno
 INSERT INTO menu_producto (id_menu, id_producto, orden_display) VALUES
-    (3, 7, 1), (3, 9, 2), (3, 10, 3),                    
-    (3, 14, 1), (3, 15, 2), (3, 16, 3), (3, 17, 4);         
+    (3, 7, 1), (3, 9, 2), (3, 10, 3),
+    (3, 14, 1), (3, 15, 2), (3, 16, 3), (3, 17, 4);
 
 INSERT INTO menu_combo (id_menu, id_combo, orden_display) VALUES
     (3, 4, 1);
+
+-- Productos Menú Feria del Maíz (menú 4)
+INSERT INTO menu_producto (id_menu, id_producto, orden_display) VALUES
+    (4, 1, 1), (4, 2, 2), (4, 3, 3), (4, 4, 4), (4, 5, 5), (4, 6, 6),
+    (4, 7, 1), (4, 8, 2), (4, 10, 3), (4, 13, 4),
+    (4, 14, 1), (4, 15, 2), (4, 17, 3);
+
+INSERT INTO menu_combo (id_menu, id_combo, orden_display) VALUES
+    (4, 1, 1), (4, 2, 2), (4, 3, 3), (4, 4, 4);
 
 -- ===========================================================
 -- PROCESOS DE PREPARACIÓN (ejemplos con 1, 2 y 3 estaciones)
