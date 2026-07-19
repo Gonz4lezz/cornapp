@@ -9,6 +9,15 @@ import MenuListado from './pages/MenuListado';
 import MenuDetalle from './pages/MenuDetalle';
 import ProcesoListado from './pages/ProcesoListado';
 import ProcesoDetalle from './pages/ProcesoDetalle';
+import AdminHome from './pages/admin/AdminHome';
+import ProductoMantenimiento from './pages/admin/ProductoMantenimiento';
+import ProductoForm from './pages/admin/ProductoForm';
+import ComboMantenimiento from './pages/admin/ComboMantenimiento';
+import ComboForm from './pages/admin/ComboForm';
+import ProcesoMantenimiento from './pages/admin/ProcesoMantenimiento';
+import ProcesoForm from './pages/admin/ProcesoForm';
+import MenuMantenimiento from './pages/admin/MenuMantenimiento';
+import MenuForm from './pages/admin/MenuForm';
 import './App.css';
 
 function App() {
@@ -25,6 +34,20 @@ function App() {
           <Route path="/menus/:id" element={<MenuDetalle />} />
           <Route path="/procesos" element={<ProcesoListado />} />
           <Route path="/procesos/:id" element={<ProcesoDetalle />} />
+
+          <Route path="/admin" element={<AdminHome />} />
+          <Route path="/admin/productos" element={<ProductoMantenimiento />} />
+          <Route path="/admin/productos/nuevo" element={<ProductoForm />} />
+          <Route path="/admin/productos/:id/editar" element={<ProductoForm />} />
+          <Route path="/admin/combos" element={<ComboMantenimiento />} />
+          <Route path="/admin/combos/nuevo" element={<ComboForm />} />
+          <Route path="/admin/combos/:id/editar" element={<ComboForm />} />
+          <Route path="/admin/procesos" element={<ProcesoMantenimiento />} />
+          <Route path="/admin/procesos/nuevo" element={<ProcesoForm />} />
+          <Route path="/admin/procesos/:id/editar" element={<ProcesoForm />} />
+          <Route path="/admin/menus" element={<MenuMantenimiento />} />
+          <Route path="/admin/menus/nuevo" element={<MenuForm />} />
+          <Route path="/admin/menus/:id/editar" element={<MenuForm />} />
         </Routes>
       </Layout>
     </BrowserRouter>

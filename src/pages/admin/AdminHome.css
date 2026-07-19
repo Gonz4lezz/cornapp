@@ -1,0 +1,53 @@
+.admin-secciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.admin-seccion-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border);
+}
+
+.admin-seccion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  color: inherit;
+  border-color: var(--secondary);
+}
+
+.admin-seccion-icono {
+  font-size: 2.4rem;
+  min-width: 60px;
+  text-align: center;
+}
+
+.admin-seccion-info {
+  flex: 1;
+}
+
+.admin-seccion-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.15rem;
+}
+
+.admin-seccion-info p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.admin-seccion-arrow {
+  color: var(--secondary);
+  font-size: 1.4rem;
+}

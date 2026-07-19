@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import './Layout.css';
 
 const navLinks = [
@@ -7,6 +8,7 @@ const navLinks = [
   { to: '/combos', label: 'Combos' },
   { to: '/menus', label: 'Menús' },
   { to: '/procesos', label: 'Preparación' },
+  { to: '/admin', label: 'Mantenimiento' },
 ];
 
 function Layout({ children }) {
@@ -26,7 +28,12 @@ function Layout({ children }) {
               <li key={link.to}>
                 <Link
                   to={link.to}
-                  className={location.pathname === link.to || (link.to !== '/' && location.pathname.startsWith(link.to)) ? 'active' : ''}
+                  className={
+                    location.pathname === link.to ||
+                    (link.to !== '/' && location.pathname.startsWith(link.to))
+                      ? 'active'
+                      : ''
+                  }
                 >
                   {link.label}
                 </Link>
@@ -36,15 +43,33 @@ function Layout({ children }) {
         </div>
       </nav>
 
-      <main className="main-content">
-        {children}
-      </main>
+      <main className="main-content">{children}</main>
 
       <footer className="footer">
         <div className="footer-container">
           <p>&copy; 2026 CornApp — DEVSHARKS</p>
         </div>
       </footer>
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#211206',
+            color: '#FFFFFF',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            fontSize: '0.9rem',
+          },
+          success: {
+            iconTheme: { primary: '#FF8E42', secondary: '#FFFFFF' },
+          },
+          error: {
+            style: { background: '#8B1E1E', color: '#FFFFFF' },
+          },
+        }}
+      />
     </>
   );
 }
