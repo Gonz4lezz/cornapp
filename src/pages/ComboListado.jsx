@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { comboService } from '../services/api';
+import { comboService, resolveImageUrl } from '../services/api';
+import { formatoMoneda } from '../utils/format';
 import './ComboListado.css';
 
 function ComboListado() {
@@ -40,7 +41,7 @@ function ComboListado() {
             >
               <div className="combo-card-img">
                 {combo.imagen ? (
-                  <img src={combo.imagen} alt={combo.nombre} />
+                  <img src={resolveImageUrl(combo.imagen)} alt={combo.nombre} />
                 ) : (
                   <div className="combo-card-placeholder"></div>
                 )}
@@ -53,9 +54,7 @@ function ComboListado() {
                     ? combo.descripcion.substring(0, 90) + '...'
                     : combo.descripcion}
                 </p>
-                <span className="combo-card-precio">
-                  ₡{Number(combo.precio_combo).toLocaleString('es-CR')}
-                </span>
+                <span className="combo-card-precio">{formatoMoneda(combo.precio_combo)}</span>
               </div>
             </Link>
           ))}
