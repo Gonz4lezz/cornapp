@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { comboService } from '../services/api';
+import { comboService, resolveImageUrl } from '../services/api';
+import { formatoMoneda } from '../utils/format';
 import './ComboDetalle.css';
 
 function ComboDetalle() {
@@ -39,16 +40,17 @@ function ComboDetalle() {
         <div className="detalle-layout">
           <div className="detalle-imagen">
             {imagenPrincipal ? (
-              <img src={imagenPrincipal.url_imagen} alt={imagenPrincipal.texto_alt || combo.nombre} />
+              <img
+                src={resolveImageUrl(imagenPrincipal.url_imagen)}
+                alt={imagenPrincipal.texto_alt || combo.nombre}
+              />
             ) : (
               <div className="detalle-imagen-placeholder"></div>
             )}
           </div>
 
           <div className="detalle-info">
-            <div className="detalle-precio">
-              ₡{Number(combo.precio_combo).toLocaleString('es-CR')}
-            </div>
+            <div className="detalle-precio">{formatoMoneda(combo.precio_combo)}</div>
 
             <div className="detalle-seccion">
               <h3>Descripción</h3>
@@ -63,19 +65,17 @@ function ComboDetalle() {
                     <div key={prod.id_producto} className="combo-producto-item">
                       <div className="combo-producto-img">
                         {prod.imagen ? (
-                          <img src={prod.imagen} alt={prod.nombre} />
+                          <img src={resolveImageUrl(prod.imagen)} alt={prod.nombre} />
                         ) : (
                           <span></span>
                         )}
                       </div>
                       <div className="combo-producto-info">
                         <span className="combo-producto-nombre">{prod.nombre}</span>
-                        <span className="combo-producto-cantidad">
-                          Cantidad: {prod.cantidad}
-                        </span>
+                        <span className="combo-producto-cantidad">Cantidad: {prod.cantidad}</span>
                       </div>
                       <span className="combo-producto-precio">
-                        ₡{Number(prod.precio_base).toLocaleString('es-CR')}
+                        {formatoMoneda(prod.precio_base)}
                       </span>
                     </div>
                   ))}
