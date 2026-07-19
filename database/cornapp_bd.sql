@@ -199,12 +199,16 @@ CREATE TABLE imagen_combo (
 -- ============================================================
 
 CREATE TABLE menu (
-    id_menu     INT          NOT NULL AUTO_INCREMENT,
-    nombre      VARCHAR(150) NOT NULL,
-    descripcion TEXT,
-    esta_activo BOOLEAN      NOT NULL DEFAULT TRUE,
-    creado_en   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    editado_en  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id_menu       INT          NOT NULL AUTO_INCREMENT,
+    nombre        VARCHAR(150) NOT NULL,
+    descripcion   TEXT,
+    fecha_inicio  DATE         NULL,
+    fecha_fin     DATE         NULL,
+    hora_inicio   TIME         NULL,
+    hora_fin      TIME         NULL,
+    esta_activo   BOOLEAN      NOT NULL DEFAULT TRUE,
+    creado_en     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    editado_en    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_menu),
     UNIQUE KEY uq_menu_nombre (nombre)
 );
