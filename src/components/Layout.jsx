@@ -8,8 +8,12 @@ const navLinks = [
   { to: '/combos', label: 'Combos' },
   { to: '/menus', label: 'Menús' },
   { to: '/procesos', label: 'Preparación' },
+  { to: '/cupones', label: 'Cupones' },
   { to: '/admin', label: 'Mantenimiento' },
 ];
+
+// Integrantes del equipo DEVSHARKS (se muestran en el footer)
+const integrantes = ['Jurgen Calvo González', 'Keisy Monge', 'Sebastian Hernandez'];
 
 function Layout({ children }) {
   const location = useLocation();
@@ -47,7 +51,63 @@ function Layout({ children }) {
 
       <footer className="footer">
         <div className="footer-container">
-          <p>&copy; 2026 CornApp — DEVSHARKS</p>
+          <div className="footer-grid">
+            <div className="footer-col footer-brand">
+              <span className="footer-logo">CornApp</span>
+              <p className="footer-tagline">
+                Auténticos corn dogs coreanos, crujientes por fuera e
+                irresistibles por dentro. Hechos al momento con los mejores
+                ingredientes.
+              </p>
+              <span className="footer-equipo">Proyecto DEVSHARKS · ISW613</span>
+            </div>
+
+            <div className="footer-col">
+              <h4 className="footer-titulo">Explorar</h4>
+              <ul className="footer-links">
+                <li>
+                  <Link to="/productos">Productos</Link>
+                </li>
+                <li>
+                  <Link to="/combos">Combos</Link>
+                </li>
+                <li>
+                  <Link to="/menus">Menús</Link>
+                </li>
+                <li>
+                  <Link to="/cupones">Cupones</Link>
+                </li>
+                <li>
+                  <Link to="/procesos">Preparación</Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="footer-col">
+              <h4 className="footer-titulo">Contacto</h4>
+              <ul className="footer-contacto">
+                <li>📍 Alajuela, Costa Rica</li>
+                <li>📞 +506 0000-0000</li>
+                <li>✉️ cornapp@gmail.com</li>
+                <li>🕒 Lun a Dom · 10:00 a. m. – 9:00 p. m.</li>
+              </ul>
+            </div>
+
+            <div className="footer-col">
+              <h4 className="footer-titulo">Desarrollado por</h4>
+              <ul className="footer-integrantes">
+                {integrantes.map((nombre) => (
+                  <li key={nombre}>{nombre}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <p>
+              &copy; 2026 CornApp — Equipo DEVSHARKS.
+            </p>
+          </div>
         </div>
       </footer>
 
