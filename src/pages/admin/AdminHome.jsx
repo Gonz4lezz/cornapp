@@ -1,5 +1,10 @@
 import { Link } from 'react-router-dom';
 import './AdminHome.css';
+import CategoryIcon from '@mui/icons-material/Category';
+import AutoAwesomeMosaicRoundedIcon from '@mui/icons-material/AutoAwesomeMosaicRounded';
+import OutdoorGrillRoundedIcon from '@mui/icons-material/OutdoorGrillRounded';
+import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
+import LocalActivityRoundedIcon from '@mui/icons-material/LocalActivityRounded';
 
 const secciones = [
   {
@@ -7,33 +12,33 @@ const secciones = [
     titulo: 'Productos',
     descripcion:
       'Gestioná los productos del catálogo: corn dogs, acompañamientos y bebidas.',
-    icono: '🍟',
+    icono: <CategoryIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
   },
   {
     to: '/admin/combos',
     titulo: 'Combos',
     descripcion: 'Administrá los combos y los productos que los componen.',
-    icono: '📦',
+    icono: <AutoAwesomeMosaicRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
   },
   {
     to: '/admin/procesos',
     titulo: 'Procesos de Preparación',
     descripcion: 'Definí el paso a paso de cocina para cada producto.',
-    icono: '👨‍🍳',
+    icono: <OutdoorGrillRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
   },
   {
     to: '/admin/menus',
     titulo: 'Menús',
     descripcion:
       'Configurá los menús con sus productos, combos, fechas y horarios.',
-    icono: '📋',
+    icono: <MenuBookRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
   },
   {
     to: '/admin/cupones',
     titulo: 'Cupones',
     descripcion:
       'Creá y administrá los cupones de descuento por producto o combo.',
-    icono: '🎟️',
+    icono: <LocalActivityRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
   },
 ];
 

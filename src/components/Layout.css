@@ -32,6 +32,9 @@
 
 .logo-icon {
   font-size: 1.6rem;
+  width: 66px;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-links {
@@ -97,6 +100,7 @@
   font-weight: 700;
   color: var(--secondary);
   margin-bottom: 12px;
+  width: 90px;
 }
 
 .footer-tagline {

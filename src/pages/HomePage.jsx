@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { cuponService } from '../services/api';
 import CuponSlider from '../components/CuponSlider';
 import './HomePage.css';
+import AlarmOnRoundedIcon from '@mui/icons-material/AlarmOnRounded';
+import StarsRoundedIcon from '@mui/icons-material/StarsRounded';
+import CottageRoundedIcon from '@mui/icons-material/CottageRounded';
 
 function HomePage() {
   const [cupones, setCupones] = useState([]);
@@ -20,7 +23,9 @@ function HomePage() {
     <div className="home">
       <section className="hero-section">
         <div className="hero-content">
-          <h1>Korean Corn Dogs</h1>
+          <span className="hero-logo">
+                <img src="/assets/cornapp-logo-nombre.png" alt="Logo" />
+          </span>
           <p className="hero-subtitle">
             Los auténticos corn dogs coreanos, crujientes por fuera,
             irresistibles por dentro. Hechos al momento con los mejores
@@ -40,7 +45,7 @@ function HomePage() {
       <section className="features-section">
         <div className="features-container">
           <div className="feature-card">
-            <span className="feature-icon">★</span>
+            <span className="feature-icon"><CottageRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }} /></span>
             <h3>Corn Dogs Artesanales</h3>
             <p>
               Masa de maíz dulce preparada diariamente con receta coreana
@@ -48,14 +53,14 @@ function HomePage() {
             </p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">★</span>
+            <span className="feature-icon"><StarsRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }} /></span>
             <h3>Variedad de Sabores</h3>
             <p>
               Desde el clásico hasta combinaciones con queso, chocolate y más.
             </p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">★</span>
+            <span className="feature-icon"><AlarmOnRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }} /></span>
             <h3>Rápido y Fresco</h3>
             <p>
               Preparados al momento para que disfrutes la mejor textura y sabor.

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE = 'hhttp://localhost:81/cornapp';
+export const API_BASE = 'http://localhost:81/cornapp';
 
 const api = axios.create({
   baseURL: API_BASE,

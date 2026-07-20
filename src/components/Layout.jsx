@@ -23,7 +23,9 @@ function Layout({ children }) {
       <nav className="navbar">
         <div className="navbar-container">
           <Link to="/" className="navbar-logo">
-            <span className="logo-icon"></span>
+            <span className="logo-icon">
+              <img src="/assets/cornapp-logo.png" alt="Logo" />
+            </span>
             <span className="logo-text">CornApp</span>
           </Link>
 
@@ -53,7 +55,9 @@ function Layout({ children }) {
         <div className="footer-container">
           <div className="footer-grid">
             <div className="footer-col footer-brand">
-              <span className="footer-logo">CornApp</span>
+              <span className="footer-logo">
+                <img src="/assets/cornapp-logo-nombre.png" alt="Logo" />
+              </span>
               <p className="footer-tagline">
                 Auténticos corn dogs coreanos, crujientes por fuera e
                 irresistibles por dentro. Hechos al momento con los mejores
@@ -89,7 +93,7 @@ function Layout({ children }) {
                 <li>📍 Alajuela, Costa Rica</li>
                 <li>📞 +506 0000-0000</li>
                 <li>✉️ cornapp@gmail.com</li>
-                <li>🕒 Lun a Dom · 10:00 a. m. – 9:00 p. m.</li>
+                <li>🕒 Lun a Dom · 10:00 a. m. - 9:00 p. m.</li>
               </ul>
             </div>
 
@@ -105,7 +109,7 @@ function Layout({ children }) {
 
           <div className="footer-bottom">
             <p>
-              &copy; 2026 CornApp — Equipo DEVSHARKS.
+              &copy; 2026 CornApp - Equipo DEVSHARKS.
             </p>
           </div>
         </div>

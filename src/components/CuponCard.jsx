@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { resolveImageUrl } from '../services/api';
 import { precioConDescuento, formatoMoneda } from '../utils/format';
 import './CuponCard.css';
+import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 
 // Card de un cupón. Al hacer clic lleva al producto o combo asociado.
 function CuponCard({ cupon }) {
@@ -33,7 +34,7 @@ function CuponCard({ cupon }) {
         {cupon.imagen ? (
           <img src={resolveImageUrl(cupon.imagen)} alt={nombreItem} />
         ) : (
-          <div className="cupon-card-img-placeholder">🎟️</div>
+          <div className="cupon-card-img-placeholder"><LocalActivityIcon fontSize="large" /></div>
         )}
       </div>
 

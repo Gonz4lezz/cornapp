@@ -6,6 +6,7 @@ import {
   precioConDescuento,
 } from '../utils/format';
 import './CuponBanner.css';
+import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 
 // Banner que aclara el descuento del cupón vigente en el detalle de un
 // producto o combo. No se renderiza si no hay cupón.
@@ -21,7 +22,7 @@ function CuponBanner({ cupon, precioBase }) {
   return (
     <div className="cupon-banner">
       <div className="cupon-banner-sello">
-        <span className="cupon-banner-sello-icono">🎟️</span>
+        <span className="cupon-banner-sello-icono"><LocalActivityIcon fontSize="large" /></span>
         <span className="cupon-banner-sello-texto">
           {etiquetaDescuento(cupon.tipo_descuento, cupon.valor_descuento)}
         </span>
