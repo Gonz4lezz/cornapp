@@ -1,0 +1,29 @@
+.cupones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.cupones-vacio {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--text-light);
+}
+
+.cupones-vacio-icono {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.cupones-vacio h3 {
+  color: var(--tertiary);
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .cupones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}

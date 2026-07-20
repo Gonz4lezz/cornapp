@@ -65,6 +65,36 @@
   color: var(--secondary);
 }
 
+.cupones-home-section {
+  padding: 56px 24px;
+  background: var(--bg);
+}
+
+.cupones-home-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cupones-home-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.cupones-home-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.cupones-home-header p {
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.cupones-home-cta {
+  text-align: center;
+  margin-top: 36px;
+}
+
 .features-section {
   padding: 64px 24px;
   background: var(--bg-light);
