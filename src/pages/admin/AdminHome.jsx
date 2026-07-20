@@ -5,7 +5,8 @@ const secciones = [
   {
     to: '/admin/productos',
     titulo: 'Productos',
-    descripcion: 'Gestioná los productos del catálogo: corn dogs, acompañamientos y bebidas.',
+    descripcion:
+      'Gestioná los productos del catálogo: corn dogs, acompañamientos y bebidas.',
     icono: '🍟',
   },
   {
@@ -23,8 +24,16 @@ const secciones = [
   {
     to: '/admin/menus',
     titulo: 'Menús',
-    descripcion: 'Configurá los menús con sus productos, combos, fechas y horarios.',
+    descripcion:
+      'Configurá los menús con sus productos, combos, fechas y horarios.',
     icono: '📋',
+  },
+  {
+    to: '/admin/cupones',
+    titulo: 'Cupones',
+    descripcion:
+      'Creá y administrá los cupones de descuento por producto o combo.',
+    icono: '🎟️',
   },
 ];
 
