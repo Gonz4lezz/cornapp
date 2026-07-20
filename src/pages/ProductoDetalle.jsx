@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { productoService, resolveImageUrl } from '../services/api';
+import {
+  productoService,
+  cuponService,
+  resolveImageUrl,
+} from '../services/api';
 import { formatoMoneda } from '../utils/format';
+import CuponBanner from '../components/CuponBanner';
 import './ProductoDetalle.css';
 
 function ProductoDetalle() {
   const { id } = useParams();
   const [producto, setProducto] = useState(null);
+  const [cupon, setCupon] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    productoService.getById(id)
+    productoService
+      .getById(id)
       .then((res) => {
         setProducto(res.data);
         setLoading(false);
@@ -20,18 +27,32 @@ function ProductoDetalle() {
         setError('Error al cargar el producto');
         setLoading(false);
       });
+
+    // Cupón vigente del producto (opcional, no bloquea la vista)
+    cuponService
+      .getPorProducto(id)
+      .then((res) => {
+        if (res.data && res.data.id_cupon) setCupon(res.data);
+        else setCupon(null);
+      })
+      .catch(() => setCupon(null));
   }, [id]);
 
   if (loading) return <div className="loading">Cargando producto...</div>;
   if (error) return <div className="error-message">{error}</div>;
-  if (!producto) return <div className="error-message">Producto no encontrado</div>;
+  if (!producto)
+    return <div className="error-message">Producto no encontrado</div>;
 
-  const imagenPrincipal = producto.imagenes?.find((img) => img.es_principal == 1) || producto.imagenes?.[0];
+  const imagenPrincipal =
+    producto.imagenes?.find((img) => img.es_principal == 1) ||
+    producto.imagenes?.[0];
 
   return (
     <div className="producto-detalle">
       <div className="page-header">
-        <Link to="/productos" className="detalle-volver">&larr; Volver a Productos</Link>
+        <Link to="/productos" className="detalle-volver">
+          &larr; Volver a Productos
+        </Link>
         <h1>{producto.nombre}</h1>
         <p>{producto.categoria}</p>
       </div>
@@ -50,7 +71,11 @@ function ProductoDetalle() {
           </div>
 
           <div className="detalle-info">
-            <div className="detalle-precio">{formatoMoneda(producto.precio_base)}</div>
+            <div className="detalle-precio">
+              {formatoMoneda(producto.precio_base)}
+            </div>
+
+            <CuponBanner cupon={cupon} precioBase={producto.precio_base} />
 
             <div className="detalle-seccion">
               <h3>Descripción</h3>

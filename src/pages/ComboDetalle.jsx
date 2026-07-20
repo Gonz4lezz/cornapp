@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { comboService, resolveImageUrl } from '../services/api';
+import { comboService, cuponService, resolveImageUrl } from '../services/api';
 import { formatoMoneda } from '../utils/format';
+import CuponBanner from '../components/CuponBanner';
 import './ComboDetalle.css';
 
 function ComboDetalle() {
   const { id } = useParams();
   const [combo, setCombo] = useState(null);
+  const [cupon, setCupon] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    comboService.getById(id)
+    comboService
+      .getById(id)
       .then((res) => {
         setCombo(res.data);
         setLoading(false);
@@ -20,18 +23,30 @@ function ComboDetalle() {
         setError('Error al cargar el combo');
         setLoading(false);
       });
+
+    // Cupón vigente del combo (opcional, no bloquea la vista)
+    cuponService
+      .getPorCombo(id)
+      .then((res) => {
+        if (res.data && res.data.id_cupon) setCupon(res.data);
+        else setCupon(null);
+      })
+      .catch(() => setCupon(null));
   }, [id]);
 
   if (loading) return <div className="loading">Cargando combo...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!combo) return <div className="error-message">Combo no encontrado</div>;
 
-  const imagenPrincipal = combo.imagenes?.find((img) => img.es_principal == 1) || combo.imagenes?.[0];
+  const imagenPrincipal =
+    combo.imagenes?.find((img) => img.es_principal == 1) || combo.imagenes?.[0];
 
   return (
     <div className="combo-detalle">
       <div className="page-header">
-        <Link to="/combos" className="detalle-volver">&larr; Volver a Combos</Link>
+        <Link to="/combos" className="detalle-volver">
+          &larr; Volver a Combos
+        </Link>
         <h1>{combo.nombre}</h1>
         <p>{combo.categoria}</p>
       </div>
@@ -50,7 +65,11 @@ function ComboDetalle() {
           </div>
 
           <div className="detalle-info">
-            <div className="detalle-precio">{formatoMoneda(combo.precio_combo)}</div>
+            <div className="detalle-precio">
+              {formatoMoneda(combo.precio_combo)}
+            </div>
+
+            <CuponBanner cupon={cupon} precioBase={combo.precio_combo} />
 
             <div className="detalle-seccion">
               <h3>Descripción</h3>
@@ -65,14 +84,21 @@ function ComboDetalle() {
                     <div key={prod.id_producto} className="combo-producto-item">
                       <div className="combo-producto-img">
                         {prod.imagen ? (
-                          <img src={resolveImageUrl(prod.imagen)} alt={prod.nombre} />
+                          <img
+                            src={resolveImageUrl(prod.imagen)}
+                            alt={prod.nombre}
+                          />
                         ) : (
                           <span></span>
                         )}
                       </div>
                       <div className="combo-producto-info">
-                        <span className="combo-producto-nombre">{prod.nombre}</span>
-                        <span className="combo-producto-cantidad">Cantidad: {prod.cantidad}</span>
+                        <span className="combo-producto-nombre">
+                          {prod.nombre}
+                        </span>
+                        <span className="combo-producto-cantidad">
+                          Cantidad: {prod.cantidad}
+                        </span>
                       </div>
                       <span className="combo-producto-precio">
                         {formatoMoneda(prod.precio_base)}
