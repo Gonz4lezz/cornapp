@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE = 'http://localhost:81/cornapp';
+export const API_BASE = 'hhttp://localhost:81/cornapp';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -48,9 +48,12 @@ export const menuService = {
 export const procesoService = {
   getAll: () => api.get('/ProcesoPreparacionController'),
   getById: (id) => api.get(`/ProcesoPreparacionController/${id}`),
-  getProductosDisponibles: () => api.get('/ProcesoPreparacionController/productosDisponibles'),
-  create: (payload) => api.post('/ProcesoPreparacionController/create', payload),
-  update: (payload) => api.post('/ProcesoPreparacionController/update', payload),
+  getProductosDisponibles: () =>
+    api.get('/ProcesoPreparacionController/productosDisponibles'),
+  create: (payload) =>
+    api.post('/ProcesoPreparacionController/create', payload),
+  update: (payload) =>
+    api.post('/ProcesoPreparacionController/update', payload),
 };
 
 export const categoriaService = {
@@ -63,6 +66,16 @@ export const ingredienteService = {
 
 export const estacionService = {
   getAll: () => api.get('/EstacionController'),
+};
+
+export const cuponService = {
+  getDisponibles: () => api.get('/CuponController'),
+  getAllMantenimiento: () => api.get('/CuponController/mantenimiento'),
+  getById: (id) => api.get(`/CuponController/${id}`),
+  getPorProducto: (id) => api.get(`/CuponController/porProducto/${id}`),
+  getPorCombo: (id) => api.get(`/CuponController/porCombo/${id}`),
+  create: (payload) => api.post('/CuponController/create', payload),
+  update: (payload) => api.post('/CuponController/update', payload),
 };
 
 export default api;

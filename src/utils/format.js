@@ -31,7 +31,32 @@ export const formatoHora = (valor) => {
   return `${hora12}:${m} ${sufijo}`;
 };
 
-export const extraerErrorAPI = (error, mensajePorDefecto = 'Ocurrió un error') => {
+// Etiqueta legible del descuento de un cupón (ej: "15% de descuento" o "₡500 de descuento")
+export const etiquetaDescuento = (tipoDescuento, valor) => {
+  const num = Number(valor) || 0;
+  if (tipoDescuento === 'porcentaje') {
+    return `${num % 1 === 0 ? num : num.toFixed(0)}% de descuento`;
+  }
+  return `${formatoMoneda(num)} de descuento`;
+};
+
+// Precio final aplicando el descuento del cupón (nunca menor a 0)
+export const precioConDescuento = (precioBase, tipoDescuento, valor) => {
+  const precio = Number(precioBase) || 0;
+  const num = Number(valor) || 0;
+  let final = precio;
+  if (tipoDescuento === 'porcentaje') {
+    final = precio - (precio * num) / 100;
+  } else {
+    final = precio - num;
+  }
+  return final < 0 ? 0 : final;
+};
+
+export const extraerErrorAPI = (
+  error,
+  mensajePorDefecto = 'Ocurrió un error',
+) => {
   if (!error) return mensajePorDefecto;
   const data = error.response?.data;
   if (typeof data === 'string') return data;
