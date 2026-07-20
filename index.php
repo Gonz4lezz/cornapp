@@ -24,6 +24,7 @@ require_once "models/ProcesoPreparacionModel.php";
 require_once "models/CategoriaModel.php";
 require_once "models/IngredienteModel.php";
 require_once "models/EstacionModel.php";
+require_once "models/CuponModel.php";
 
 /***--- Agregar todos los controladores*/
 require_once "controllers/ProductoController.php";
@@ -33,6 +34,7 @@ require_once "controllers/ProcesoPreparacionController.php";
 require_once "controllers/CategoriaController.php";
 require_once "controllers/IngredienteController.php";
 require_once "controllers/EstacionController.php";
+require_once "controllers/CuponController.php";
 
 
 //Enrutador
