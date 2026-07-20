@@ -416,6 +416,7 @@ CREATE TABLE pago (
 );
 
 -- Cupones de descuento (se crea aquí porque pedido_cupon la referencia)
+-- Cada cupón de descuento aplica a UN producto o UN combo (funcionalidad extra del equipo).
 CREATE TABLE cupon (
     id_cupon                INT           NOT NULL AUTO_INCREMENT,
     codigo                  VARCHAR(50)   NOT NULL,
@@ -423,17 +424,26 @@ CREATE TABLE cupon (
     descripcion             TEXT,
     tipo_descuento          ENUM('porcentaje','monto_fijo') NOT NULL,
     valor_descuento         DECIMAL(8,2)  NOT NULL,
+    id_producto             INT           NULL,           -- Cupón vinculado a un producto
+    id_combo                INT           NULL,           -- o a un combo (exactamente uno)
     monto_minimo_pedido     DECIMAL(10,2) NULL,
     limite_usos             INT           NULL,
     cantidad_usos           INT           NOT NULL DEFAULT 0,
-    permite_otra_promocion  BOOLEAN       NOT NULL DEFAULT FALSE,  
+    permite_otra_promocion  BOOLEAN       NOT NULL DEFAULT FALSE,
     fecha_inicio            DATETIME      NOT NULL,
     fecha_fin               DATETIME      NOT NULL,
     esta_activo             BOOLEAN       NOT NULL DEFAULT TRUE,
     creado_en               TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     editado_en              TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_cupon),
-    UNIQUE KEY uq_cupon_codigo (codigo)
+    UNIQUE KEY uq_cupon_codigo (codigo),
+    -- Un cupón aplica a un producto o a un combo, nunca a ambos ni a ninguno
+    CONSTRAINT chk_cupon_item CHECK (
+        (id_producto IS NOT NULL AND id_combo IS NULL) OR
+        (id_producto IS NULL AND id_combo IS NOT NULL)
+    ),
+    CONSTRAINT fk_cupon_producto FOREIGN KEY (id_producto) REFERENCES producto (id_producto) ON DELETE CASCADE,
+    CONSTRAINT fk_cupon_combo    FOREIGN KEY (id_combo)    REFERENCES combo    (id_combo)    ON DELETE CASCADE
 );
 
 -- Relación M:N: cupones aplicados a pedidos (tomado de compañeros: cupón vinculado al pedido)

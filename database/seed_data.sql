@@ -476,3 +476,22 @@ INSERT INTO paso_proceso (id_proceso, id_estacion, orden_paso, tiempo_estimado, 
 INSERT INTO proceso_preparacion (id_producto, tiempo_estimado_total) VALUES (17, 3);
 INSERT INTO paso_proceso (id_proceso, id_estacion, orden_paso, tiempo_estimado, instrucciones) VALUES
     (14, 1, 1, 3, 'Preparar infusión de té negro, enfriar, endulzar con azúcar y servir con hielo y rodaja de limón.');
+
+-- ============================================================
+-- CUPONES DE DESCUENTO (funcionalidad extra del equipo)
+-- Cada cupón aplica a un producto o a un combo. Solo descuentos
+-- por porcentaje o monto fijo. Vigencia durante julio 2026.
+-- ============================================================
+
+-- Cupones sobre productos
+INSERT INTO cupon (codigo, nombre, descripcion, tipo_descuento, valor_descuento, id_producto, id_combo, fecha_inicio, fecha_fin, esta_activo) VALUES
+    ('CLASICO15',  '15% en Corn Dog Clásico',     'Llevá nuestro corn dog estrella con 15% de descuento durante toda la temporada.', 'porcentaje', 15.00, 1,  NULL, '2026-07-01 00:00:00', '2026-12-31 23:59:59', TRUE),
+    ('QUESO500',   '₡500 en Corn Dog de Queso',   'Descontá ₡500 en el favorito relleno de mozzarella derretido.',                   'monto_fijo', 500.00, 2,  NULL, '2026-07-01 00:00:00', '2026-12-31 23:59:59', TRUE),
+    ('CHOCO20',    '20% en Corn Dog de Chocolate','Endulzá tu día con 20% de descuento en el corn dog de chocolate.',               'porcentaje', 20.00, 4,  NULL, '2026-07-01 00:00:00', '2026-12-31 23:59:59', TRUE),
+    ('PAPAS300',   '₡300 en Papas Supremas',      'Las papas más cargadas de la casa con ₡300 menos.',                              'monto_fijo', 300.00, 13, NULL, '2026-07-01 00:00:00', '2026-12-31 23:59:59', TRUE),
+    ('LIMON10',    '10% en Limonada Natural',     'Refrescate con 10% de descuento en la limonada preparada al momento.',           'porcentaje', 10.00, 14, NULL, '2026-07-01 00:00:00', '2026-12-31 23:59:59', TRUE);
+
+-- Cupones sobre combos
+INSERT INTO cupon (codigo, nombre, descripcion, tipo_descuento, valor_descuento, id_producto, id_combo, fecha_inicio, fecha_fin, esta_activo) VALUES
+    ('COMBO1000',  '₡1000 en Combo Familiar',     'El combo para compartir con ₡1000 de descuento directo.',                        'monto_fijo', 1000.00, NULL, 3, '2026-07-01 00:00:00', '2026-12-31 23:59:59', TRUE),
+    ('QUESOLOVERS','25% en Combo Queso Lovers',   'Los amantes del queso se llevan un 25% de descuento en su combo.',               'porcentaje', 25.00,   NULL, 2, '2026-07-01 00:00:00', '2026-12-31 23:59:59', TRUE);
