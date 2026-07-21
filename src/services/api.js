@@ -27,6 +27,9 @@ export const productoService = {
     api.post('/ProductoController/update', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  desactivar: (id) =>
+    api.post('/ProductoController/desactivar', { id_producto: id }),
+  activar: (id) => api.post('/ProductoController/activar', { id_producto: id }),
 };
 
 export const comboService = {
@@ -35,18 +38,25 @@ export const comboService = {
   getById: (id) => api.get(`/ComboController/${id}`),
   create: (payload) => api.post('/ComboController/create', payload),
   update: (payload) => api.post('/ComboController/update', payload),
+  desactivar: (id) => api.post('/ComboController/desactivar', { id_combo: id }),
+  activar: (id) => api.post('/ComboController/activar', { id_combo: id }),
 };
 
 export const menuService = {
   getAll: () => api.get('/MenuController'),
+  getAllMantenimiento: () => api.get('/MenuController/mantenimiento'),
   getById: (id) => api.get(`/MenuController/${id}`),
   getDisponible: () => api.get('/MenuController/disponible'),
   create: (payload) => api.post('/MenuController/create', payload),
   update: (payload) => api.post('/MenuController/update', payload),
+  desactivar: (id) => api.post('/MenuController/desactivar', { id_menu: id }),
+  activar: (id) => api.post('/MenuController/activar', { id_menu: id }),
 };
 
 export const procesoService = {
   getAll: () => api.get('/ProcesoPreparacionController'),
+  getAllMantenimiento: () =>
+    api.get('/ProcesoPreparacionController/mantenimiento'),
   getById: (id) => api.get(`/ProcesoPreparacionController/${id}`),
   getProductosDisponibles: () =>
     api.get('/ProcesoPreparacionController/productosDisponibles'),
@@ -54,6 +64,10 @@ export const procesoService = {
     api.post('/ProcesoPreparacionController/create', payload),
   update: (payload) =>
     api.post('/ProcesoPreparacionController/update', payload),
+  desactivar: (id) =>
+    api.post('/ProcesoPreparacionController/desactivar', { id_proceso: id }),
+  activar: (id) =>
+    api.post('/ProcesoPreparacionController/activar', { id_proceso: id }),
 };
 
 export const categoriaService = {
@@ -76,6 +90,8 @@ export const cuponService = {
   getPorCombo: (id) => api.get(`/CuponController/porCombo/${id}`),
   create: (payload) => api.post('/CuponController/create', payload),
   update: (payload) => api.post('/CuponController/update', payload),
+  desactivar: (id) => api.post('/CuponController/desactivar', { id_cupon: id }),
+  activar: (id) => api.post('/CuponController/activar', { id_cupon: id }),
 };
 
 export default api;

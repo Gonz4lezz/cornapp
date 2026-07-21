@@ -39,6 +39,28 @@ class ComboController
         $this->response->status(200)->toJSON($combos ?? []);
     }
 
+    public function desactivar()
+    {
+        $this->cambiarEstado(false);
+    }
+
+    public function activar()
+    {
+        $this->cambiarEstado(true);
+    }
+
+    private function cambiarEstado($activo)
+    {
+        $data = $this->request->getJSON();
+        $id = intval($data->id_combo ?? 0);
+        if ($id <= 0) {
+            $this->response->status(400)->toJSON(null, 'ID de combo requerido');
+            return;
+        }
+        $this->model->setActivo($id, $activo);
+        $this->response->status(200)->toJSON(['id_combo' => $id, 'esta_activo' => $activo ? 1 : 0]);
+    }
+
     public function create()
     {
         $data = $this->parsePayload();

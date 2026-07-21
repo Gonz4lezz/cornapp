@@ -31,6 +31,28 @@ export const formatoHora = (valor) => {
   return `${hora12}:${m} ${sufijo}`;
 };
 
+// Días de la semana (0=Domingo ... 6=Sábado)
+export const DIAS_SEMANA = [
+  { valor: 0, nombre: 'Domingo', corto: 'Dom' },
+  { valor: 1, nombre: 'Lunes', corto: 'Lun' },
+  { valor: 2, nombre: 'Martes', corto: 'Mar' },
+  { valor: 3, nombre: 'Miércoles', corto: 'Mié' },
+  { valor: 4, nombre: 'Jueves', corto: 'Jue' },
+  { valor: 5, nombre: 'Viernes', corto: 'Vie' },
+  { valor: 6, nombre: 'Sábado', corto: 'Sáb' },
+];
+
+// Convierte un arreglo de días [1,2,3] en "Lun, Mar, Mié" (ordenado)
+export const formatoDias = (dias) => {
+  if (!Array.isArray(dias) || dias.length === 0) return '';
+  return dias
+    .map((d) => Number(d))
+    .sort((a, b) => a - b)
+    .map((d) => DIAS_SEMANA.find((x) => x.valor === d)?.corto || '')
+    .filter(Boolean)
+    .join(', ');
+};
+
 // Etiqueta legible del descuento de un cupón (ej: "15% de descuento" o "₡500 de descuento")
 export const etiquetaDescuento = (tipoDescuento, valor) => {
   const num = Number(valor) || 0;

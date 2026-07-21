@@ -7,6 +7,8 @@ import {
   etiquetaDescuento,
   extraerErrorAPI,
 } from '../../utils/format';
+import { useToggleActivo } from '../../hooks/useToggleActivo';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import './admin-common.css';
 
 function CuponMantenimiento() {
@@ -22,6 +24,18 @@ function CuponMantenimiento() {
       )
       .finally(() => setCargando(false));
   }, []);
+
+  const toggle = useToggleActivo({
+    service: cuponService,
+    idKey: 'id_cupon',
+    nombreEntidad: 'Cupón',
+    onEstadoCambiado: (id, estado) =>
+      setCupones((prev) =>
+        prev.map((c) =>
+          c.id_cupon === id ? { ...c, esta_activo: estado } : c,
+        ),
+      ),
+  });
 
   if (cargando) return <div className="loading">Cargando cupones...</div>;
 
@@ -66,7 +80,10 @@ function CuponMantenimiento() {
               </thead>
               <tbody>
                 {cupones.map((c) => (
-                  <tr key={c.id_cupon}>
+                  <tr
+                    key={c.id_cupon}
+                    style={{ opacity: c.esta_activo == 1 ? 1 : 0.6 }}
+                  >
                     <td>
                       <span className="cupon-card-codigo">{c.codigo}</span>
                     </td>
@@ -104,7 +121,14 @@ function CuponMantenimiento() {
                         className="admin-btn admin-btn-ghost"
                       >
                         Editar
-                      </Link>
+                      </Link>{' '}
+                      <button
+                        type="button"
+                        className={`admin-btn ${c.esta_activo == 1 ? 'admin-btn-danger' : 'admin-btn-secondary'}`}
+                        onClick={() => toggle.pedirConfirmacion(c)}
+                      >
+                        {c.esta_activo == 1 ? 'Desactivar' : 'Activar'}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -113,6 +137,20 @@ function CuponMantenimiento() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={Boolean(toggle.objetivo)}
+        titulo={toggle.vaADesactivar ? 'Desactivar cupón' : 'Activar cupón'}
+        mensaje={
+          toggle.vaADesactivar
+            ? `¿Desactivar el cupón "${toggle.objetivo?.codigo}"? Dejará de aplicarse, pero podés reactivarlo luego.`
+            : `¿Activar el cupón "${toggle.objetivo?.codigo}"? Volverá a estar vigente según sus fechas.`
+        }
+        textoConfirmar={toggle.vaADesactivar ? 'Desactivar' : 'Activar'}
+        colorConfirmar={toggle.vaADesactivar ? 'error' : 'primary'}
+        onConfirmar={toggle.confirmar}
+        onCancelar={toggle.cancelar}
+      />
     </div>
   );
 }

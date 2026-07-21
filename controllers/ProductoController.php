@@ -39,6 +39,28 @@ class ProductoController
         $this->response->status(200)->toJSON($productos ?? []);
     }
 
+    public function desactivar()
+    {
+        $this->cambiarEstado(false);
+    }
+
+    public function activar()
+    {
+        $this->cambiarEstado(true);
+    }
+
+    private function cambiarEstado($activo)
+    {
+        $data = $this->request->getJSON();
+        $id = intval($data->id_producto ?? 0);
+        if ($id <= 0) {
+            $this->response->status(400)->toJSON(null, 'ID de producto requerido');
+            return;
+        }
+        $this->model->setActivo($id, $activo);
+        $this->response->status(200)->toJSON(['id_producto' => $id, 'esta_activo' => $activo ? 1 : 0]);
+    }
+
     public function create()
     {
         $data = $this->parsePayload();

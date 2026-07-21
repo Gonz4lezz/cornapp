@@ -21,6 +21,25 @@ class ProcesoPreparacionModel
         return $this->db->executeSQL($sql);
     }
 
+    // Todos los procesos (activos e inactivos) para el mantenimiento.
+    public function getAllMantenimiento()
+    {
+        $sql = "SELECT pp.id_proceso, pp.tiempo_estimado_total, pp.esta_activo,
+                       p.id_producto, p.nombre AS nombre_producto,
+                       (SELECT COUNT(*) FROM paso_proceso pas WHERE pas.id_proceso = pp.id_proceso) AS cantidad_pasos
+                FROM proceso_preparacion pp
+                INNER JOIN producto p ON pp.id_producto = p.id_producto
+                ORDER BY pp.esta_activo DESC, p.nombre ASC";
+        return $this->db->executeSQL($sql);
+    }
+
+    public function setActivo($id, $activo)
+    {
+        $id = intval($id);
+        $activo = $activo ? 1 : 0;
+        return $this->db->executeSQL_DML("UPDATE proceso_preparacion SET esta_activo = $activo WHERE id_proceso = $id");
+    }
+
     public function getById($id)
     {
         $id = intval($id);

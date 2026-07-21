@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { menuService, resolveImageUrl } from '../services/api';
-import { formatoMoneda, formatoFecha, formatoHora } from '../utils/format';
+import {
+  formatoMoneda,
+  formatoFecha,
+  formatoHora,
+  formatoDias,
+} from '../utils/format';
 import './MenuDetalle.css';
 
 function MenuDetalle() {
@@ -48,20 +53,26 @@ function MenuDetalle() {
   return (
     <div className="menu-detalle">
       <div className="page-header">
-        <Link to="/menus" className="detalle-volver">&larr; Volver a Menús</Link>
+        <Link to="/menus" className="detalle-volver">
+          &larr; Volver a Menús
+        </Link>
         <h1>{menu.nombre}</h1>
         <p>{menu.descripcion}</p>
       </div>
 
       <div className="page-content">
-        {menu.fecha_inicio && menu.hora_inicio && (
+        {menu.hora_inicio && (
           <div className="menu-detalle-horarios">
             <h3>Disponibilidad</h3>
             <div className="horarios-grid">
               <div className="horario-item">
-                <span className="horario-dia">Fechas</span>
+                <span className="horario-dia">
+                  {menu.tipo_disponibilidad === 'dias' ? 'Días' : 'Fechas'}
+                </span>
                 <span className="horario-horas">
-                  {formatoFecha(menu.fecha_inicio)} – {formatoFecha(menu.fecha_fin)}
+                  {menu.tipo_disponibilidad === 'dias'
+                    ? formatoDias(menu.dias)
+                    : `${formatoFecha(menu.fecha_inicio)} – ${formatoFecha(menu.fecha_fin)}`}
                 </span>
               </div>
               <div className="horario-item">
@@ -87,14 +98,21 @@ function MenuDetalle() {
                   >
                     <div className="menu-det-item-img">
                       {prod.imagen ? (
-                        <img src={resolveImageUrl(prod.imagen)} alt={prod.nombre} />
+                        <img
+                          src={resolveImageUrl(prod.imagen)}
+                          alt={prod.nombre}
+                        />
                       ) : (
                         <span></span>
                       )}
                     </div>
                     <div className="menu-det-item-info">
-                      <span className="menu-det-item-nombre">{prod.nombre}</span>
-                      <span className="menu-det-item-precio">{formatoMoneda(prod.precio_base)}</span>
+                      <span className="menu-det-item-nombre">
+                        {prod.nombre}
+                      </span>
+                      <span className="menu-det-item-precio">
+                        {formatoMoneda(prod.precio_base)}
+                      </span>
                     </div>
                   </Link>
                 ))}
@@ -106,7 +124,10 @@ function MenuDetalle() {
                   >
                     <div className="menu-det-item-img">
                       {combo.imagen ? (
-                        <img src={resolveImageUrl(combo.imagen)} alt={combo.nombre} />
+                        <img
+                          src={resolveImageUrl(combo.imagen)}
+                          alt={combo.nombre}
+                        />
                       ) : (
                         <span></span>
                       )}
@@ -116,7 +137,9 @@ function MenuDetalle() {
                         {combo.nombre}
                         <span className="menu-det-combo-tag">Combo</span>
                       </span>
-                      <span className="menu-det-item-precio">{formatoMoneda(combo.precio_combo)}</span>
+                      <span className="menu-det-item-precio">
+                        {formatoMoneda(combo.precio_combo)}
+                      </span>
                     </div>
                   </Link>
                 ))}

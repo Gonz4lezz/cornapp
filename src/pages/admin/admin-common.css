@@ -164,6 +164,14 @@
   grid-column: 1 / -1;
 }
 
+.admin-field-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
 .admin-form-actions {
   display: flex;
   gap: 12px;

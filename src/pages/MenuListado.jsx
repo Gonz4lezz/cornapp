@@ -1,8 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { menuService } from '../services/api';
-import { formatoMoneda, formatoFecha, formatoHora } from '../utils/format';
+import {
+  formatoMoneda,
+  formatoFecha,
+  formatoHora,
+  formatoDias,
+} from '../utils/format';
 import './MenuListado.css';
+
+// Texto de disponibilidad de un menú (por días o por rango de fechas)
+const textoDisponibilidad = (menu) => {
+  if (menu.tipo_disponibilidad === 'dias') {
+    const dias = formatoDias(menu.dias);
+    return dias ? `Días: ${dias}` : '';
+  }
+  if (menu.fecha_inicio && menu.fecha_fin) {
+    return `${formatoFecha(menu.fecha_inicio)} – ${formatoFecha(menu.fecha_fin)}`;
+  }
+  return '';
+};
 
 function MenuListado() {
   const [menus, setMenus] = useState([]);
@@ -61,13 +78,15 @@ function MenuListado() {
                   </span>
                 </div>
                 <p className="menu-card-desc">{menu.descripcion}</p>
-                {menu.fecha_inicio && menu.fecha_fin && (
+                {textoDisponibilidad(menu) && (
                   <p className="menu-card-fechas">
-                    {formatoFecha(menu.fecha_inicio)} – {formatoFecha(menu.fecha_fin)}
+                    {textoDisponibilidad(menu)}
                   </p>
                 )}
                 <div className="menu-card-footer">
-                  <span className="menu-card-items">{menu.total_items} items</span>
+                  <span className="menu-card-items">
+                    {menu.total_items} items
+                  </span>
                   <span className="menu-card-ver">Ver detalle &rarr;</span>
                 </div>
               </Link>
@@ -103,9 +122,12 @@ function MenuDisponibleView({ menu }) {
       <div className="menu-restaurante-header">
         <h3>{menu.nombre}</h3>
         <p className="menu-restaurante-desc">{menu.descripcion}</p>
-        {menu.fecha_inicio && menu.hora_inicio && (
+        {menu.hora_inicio && (
           <p className="menu-restaurante-horario">
-            Disponible del {formatoFecha(menu.fecha_inicio)} al {formatoFecha(menu.fecha_fin)} · {formatoHora(menu.hora_inicio)} a {formatoHora(menu.hora_fin)}
+            {menu.tipo_disponibilidad === 'dias'
+              ? `Disponible ${formatoDias(menu.dias)}`
+              : `Disponible del ${formatoFecha(menu.fecha_inicio)} al ${formatoFecha(menu.fecha_fin)}`}{' '}
+            · {formatoHora(menu.hora_inicio)} a {formatoHora(menu.hora_fin)}
           </p>
         )}
       </div>
@@ -122,12 +144,17 @@ function MenuDisponibleView({ menu }) {
                   <span className="menu-item-nombre">{prod.nombre}</span>
                   <span className="menu-item-dots"></span>
                 </div>
-                <span className="menu-item-precio">{formatoMoneda(prod.precio_base)}</span>
+                <span className="menu-item-precio">
+                  {formatoMoneda(prod.precio_base)}
+                </span>
               </div>
             ))}
 
             {items.combos.map((combo) => (
-              <div key={`c-${combo.id_combo}`} className="menu-item menu-item-combo">
+              <div
+                key={`c-${combo.id_combo}`}
+                className="menu-item menu-item-combo"
+              >
                 <div className="menu-item-info">
                   <span className="menu-item-nombre">
                     {combo.nombre}
@@ -135,7 +162,9 @@ function MenuDisponibleView({ menu }) {
                   </span>
                   <span className="menu-item-dots"></span>
                 </div>
-                <span className="menu-item-precio">{formatoMoneda(combo.precio_combo)}</span>
+                <span className="menu-item-precio">
+                  {formatoMoneda(combo.precio_combo)}
+                </span>
               </div>
             ))}
           </div>

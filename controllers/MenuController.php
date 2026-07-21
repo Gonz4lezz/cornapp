@@ -19,6 +19,12 @@ class MenuController
         $this->response->status(200)->toJSON($menus);
     }
 
+    public function mantenimiento()
+    {
+        $menus = $this->model->getAllMantenimiento();
+        $this->response->status(200)->toJSON($menus ?? []);
+    }
+
     public function get($id)
     {
         $menu = $this->model->getById($id);
@@ -69,10 +75,7 @@ class MenuController
             $this->response->status(500)->toJSON(null, 'No se pudo crear el menú');
             return;
         }
-        $menu = $this->model->getById($id);
-        $menu->productos = $this->model->getProductosPorMenu($id) ?? [];
-        $menu->combos = $this->model->getCombosPorMenu($id) ?? [];
-        $this->response->status(201)->toJSON($menu);
+        $this->response->status(201)->toJSON($this->model->getById($id));
     }
 
     public function update()
@@ -97,10 +100,29 @@ class MenuController
         }
 
         $this->model->update($id, $data);
-        $menu = $this->model->getById($id);
-        $menu->productos = $this->model->getProductosPorMenu($id) ?? [];
-        $menu->combos = $this->model->getCombosPorMenu($id) ?? [];
-        $this->response->status(200)->toJSON($menu);
+        $this->response->status(200)->toJSON($this->model->getById($id));
+    }
+
+    public function desactivar()
+    {
+        $this->cambiarEstado(false);
+    }
+
+    public function activar()
+    {
+        $this->cambiarEstado(true);
+    }
+
+    private function cambiarEstado($activo)
+    {
+        $data = $this->parsePayload();
+        $id = intval($data['id_menu'] ?? 0);
+        if ($id <= 0) {
+            $this->response->status(400)->toJSON(null, 'ID de menú requerido');
+            return;
+        }
+        $this->model->setActivo($id, $activo);
+        $this->response->status(200)->toJSON(['id_menu' => $id, 'esta_activo' => $activo ? 1 : 0]);
     }
 
     private function parsePayload()
@@ -115,20 +137,8 @@ class MenuController
         if (empty($data['nombre']) || strlen(trim($data['nombre'])) < 3) {
             $errores['nombre'] = 'El nombre es obligatorio y debe tener al menos 3 caracteres';
         }
-        $formatoFecha = '/^\d{4}-\d{2}-\d{2}$/';
-        $formatoHora = '/^\d{2}:\d{2}(:\d{2})?$/';
 
-        if (empty($data['fecha_inicio']) || !preg_match($formatoFecha, $data['fecha_inicio'])) {
-            $errores['fecha_inicio'] = 'Fecha de inicio inválida (formato AAAA-MM-DD)';
-        }
-        if (empty($data['fecha_fin']) || !preg_match($formatoFecha, $data['fecha_fin'])) {
-            $errores['fecha_fin'] = 'Fecha final inválida (formato AAAA-MM-DD)';
-        }
-        if (empty($errores['fecha_inicio']) && empty($errores['fecha_fin'])) {
-            if (strtotime($data['fecha_inicio']) > strtotime($data['fecha_fin'])) {
-                $errores['fecha_fin'] = 'La fecha final no puede ser anterior a la fecha de inicio';
-            }
-        }
+        $formatoHora = '/^\d{2}:\d{2}(:\d{2})?$/';
         if (empty($data['hora_inicio']) || !preg_match($formatoHora, $data['hora_inicio'])) {
             $errores['hora_inicio'] = 'Hora de inicio inválida (formato HH:MM)';
         }
@@ -140,6 +150,31 @@ class MenuController
                 $errores['hora_fin'] = 'La hora final debe ser posterior a la hora de inicio';
             }
         }
+
+        $tipo = ($data['tipo_disponibilidad'] ?? 'fechas') === 'dias' ? 'dias' : 'fechas';
+        if ($tipo === 'fechas') {
+            $formatoFecha = '/^\d{4}-\d{2}-\d{2}$/';
+            if (empty($data['fecha_inicio']) || !preg_match($formatoFecha, $data['fecha_inicio'])) {
+                $errores['fecha_inicio'] = 'Fecha de inicio inválida (formato AAAA-MM-DD)';
+            }
+            if (empty($data['fecha_fin']) || !preg_match($formatoFecha, $data['fecha_fin'])) {
+                $errores['fecha_fin'] = 'Fecha final inválida (formato AAAA-MM-DD)';
+            }
+            if (empty($errores['fecha_inicio']) && empty($errores['fecha_fin'])) {
+                if (strtotime($data['fecha_inicio']) > strtotime($data['fecha_fin'])) {
+                    $errores['fecha_fin'] = 'La fecha final no puede ser anterior a la fecha de inicio';
+                }
+            }
+        } else {
+            $dias = $data['dias'] ?? [];
+            $validos = is_array($dias) ? array_filter($dias, function ($d) {
+                return is_numeric($d) && intval($d) >= 0 && intval($d) <= 6;
+            }) : [];
+            if (count($validos) < 1) {
+                $errores['dias'] = 'Seleccioná al menos un día de la semana';
+            }
+        }
+
         $tieneProductos = !empty($data['productos']) && is_array($data['productos']) && count($data['productos']) > 0;
         $tieneCombos = !empty($data['combos']) && is_array($data['combos']) && count($data['combos']) > 0;
         if (!$tieneProductos && !$tieneCombos) {

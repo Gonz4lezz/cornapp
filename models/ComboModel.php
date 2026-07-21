@@ -30,9 +30,15 @@ class ComboModel
                        (SELECT COUNT(*) FROM combo_producto cp WHERE cp.id_combo = co.id_combo) AS cantidad_productos
                 FROM combo co
                 INNER JOIN categoria cat ON co.id_categoria = cat.id_categoria
-                WHERE co.esta_activo = 1
-                ORDER BY co.nombre ASC";
+                ORDER BY co.esta_activo DESC, co.nombre ASC";
         return $this->db->executeSQL($sql);
+    }
+
+    public function setActivo($id, $activo)
+    {
+        $id = intval($id);
+        $activo = $activo ? 1 : 0;
+        return $this->db->executeSQL_DML("UPDATE combo SET esta_activo = $activo WHERE id_combo = $id");
     }
 
     public function getById($id)

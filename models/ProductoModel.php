@@ -33,9 +33,15 @@ class ProductoModel
                        (SELECT COUNT(*) FROM producto_ingrediente pi WHERE pi.id_producto = p.id_producto) AS cantidad_ingredientes
                 FROM producto p
                 INNER JOIN categoria c ON p.id_categoria = c.id_categoria
-                WHERE p.esta_activo = 1
-                ORDER BY p.nombre ASC";
+                ORDER BY p.esta_activo DESC, p.nombre ASC";
         return $this->db->executeSQL($sql);
+    }
+
+    public function setActivo($id, $activo)
+    {
+        $id = intval($id);
+        $activo = $activo ? 1 : 0;
+        return $this->db->executeSQL_DML("UPDATE producto SET esta_activo = $activo WHERE id_producto = $id");
     }
 
     public function getById($id)

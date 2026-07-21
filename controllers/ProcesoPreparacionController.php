@@ -32,10 +32,38 @@ class ProcesoPreparacionController
         $this->response->status(200)->toJSON($proceso);
     }
 
+    public function mantenimiento()
+    {
+        $procesos = $this->model->getAllMantenimiento();
+        $this->response->status(200)->toJSON($procesos ?? []);
+    }
+
     public function productosDisponibles()
     {
         $productos = $this->model->productosDisponibles();
         $this->response->status(200)->toJSON($productos ?? []);
+    }
+
+    public function desactivar()
+    {
+        $this->cambiarEstado(false);
+    }
+
+    public function activar()
+    {
+        $this->cambiarEstado(true);
+    }
+
+    private function cambiarEstado($activo)
+    {
+        $data = $this->request->getJSON();
+        $id = intval($data->id_proceso ?? 0);
+        if ($id <= 0) {
+            $this->response->status(400)->toJSON(null, 'ID de proceso requerido');
+            return;
+        }
+        $this->model->setActivo($id, $activo);
+        $this->response->status(200)->toJSON(['id_proceso' => $id, 'esta_activo' => $activo ? 1 : 0]);
     }
 
     public function create()

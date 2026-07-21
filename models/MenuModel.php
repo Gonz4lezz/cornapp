@@ -9,42 +9,94 @@ class MenuModel
         $this->db = new MySqlConnect();
     }
 
+    // Listado público: solo menús activos.
     public function getAll()
     {
         $sql = "SELECT m.id_menu, m.nombre, m.descripcion, m.esta_activo, m.creado_en,
-                       m.fecha_inicio, m.fecha_fin, m.hora_inicio, m.hora_fin,
+                       m.tipo_disponibilidad, m.fecha_inicio, m.fecha_fin, m.hora_inicio, m.hora_fin,
                        (SELECT COUNT(*) FROM menu_producto mp WHERE mp.id_menu = m.id_menu)
                         + (SELECT COUNT(*) FROM menu_combo mc WHERE mc.id_menu = m.id_menu) AS total_items
                 FROM menu m
+                WHERE m.esta_activo = 1
                 ORDER BY m.fecha_inicio DESC, m.creado_en DESC";
-        return $this->db->executeSQL($sql);
+        $menus = $this->db->executeSQL($sql);
+        return $this->adjuntarDias($menus);
+    }
+
+    // Listado de mantenimiento: todos los menús (activos e inactivos).
+    public function getAllMantenimiento()
+    {
+        $sql = "SELECT m.id_menu, m.nombre, m.descripcion, m.esta_activo, m.creado_en,
+                       m.tipo_disponibilidad, m.fecha_inicio, m.fecha_fin, m.hora_inicio, m.hora_fin,
+                       (SELECT COUNT(*) FROM menu_producto mp WHERE mp.id_menu = m.id_menu)
+                        + (SELECT COUNT(*) FROM menu_combo mc WHERE mc.id_menu = m.id_menu) AS total_items
+                FROM menu m
+                ORDER BY m.esta_activo DESC, m.creado_en DESC";
+        $menus = $this->db->executeSQL($sql);
+        return $this->adjuntarDias($menus);
     }
 
     public function getById($id)
     {
         $id = intval($id);
         $sql = "SELECT m.id_menu, m.nombre, m.descripcion, m.esta_activo, m.creado_en, m.editado_en,
-                       m.fecha_inicio, m.fecha_fin, m.hora_inicio, m.hora_fin
+                       m.tipo_disponibilidad, m.fecha_inicio, m.fecha_fin, m.hora_inicio, m.hora_fin
                 FROM menu m
                 WHERE m.id_menu = $id";
         $result = $this->db->executeSQL($sql);
-        return (is_array($result) && count($result) > 0) ? $result[0] : null;
+        if (!is_array($result) || count($result) === 0) {
+            return null;
+        }
+        $menu = $result[0];
+        $menu->dias = $this->getDias($id);
+        return $menu;
     }
 
+    public function getDias($id)
+    {
+        $id = intval($id);
+        $sql = "SELECT dia_semana FROM menu_dia WHERE id_menu = $id ORDER BY dia_semana ASC";
+        $result = $this->db->executeSQL($sql);
+        $dias = [];
+        if (is_array($result)) {
+            foreach ($result as $row) {
+                $dias[] = intval($row->dia_semana);
+            }
+        }
+        return $dias;
+    }
+
+    // Menú disponible ahora mismo (solo 1). Considera ambos tipos de
+    // disponibilidad y prioriza el menú por fechas (evento especial) sobre
+    // el recurrente por días; luego el rango más específico y el más reciente.
     public function getDisponible()
     {
         $sql = "SELECT m.id_menu, m.nombre, m.descripcion, m.esta_activo,
-                       m.fecha_inicio, m.fecha_fin, m.hora_inicio, m.hora_fin
+                       m.tipo_disponibilidad, m.fecha_inicio, m.fecha_fin, m.hora_inicio, m.hora_fin
                 FROM menu m
                 WHERE m.esta_activo = 1
-                  AND m.fecha_inicio IS NOT NULL AND m.fecha_fin IS NOT NULL
                   AND m.hora_inicio IS NOT NULL AND m.hora_fin IS NOT NULL
-                  AND CURDATE() BETWEEN m.fecha_inicio AND m.fecha_fin
                   AND CURTIME() BETWEEN m.hora_inicio AND m.hora_fin
-                ORDER BY DATEDIFF(m.fecha_fin, m.fecha_inicio) ASC, m.creado_en DESC
+                  AND (
+                        (m.tipo_disponibilidad = 'fechas'
+                            AND m.fecha_inicio IS NOT NULL AND m.fecha_fin IS NOT NULL
+                            AND CURDATE() BETWEEN m.fecha_inicio AND m.fecha_fin)
+                     OR (m.tipo_disponibilidad = 'dias'
+                            AND EXISTS (SELECT 1 FROM menu_dia md
+                                        WHERE md.id_menu = m.id_menu
+                                          AND md.dia_semana = DAYOFWEEK(CURDATE()) - 1))
+                      )
+                ORDER BY (m.tipo_disponibilidad = 'fechas') DESC,
+                         DATEDIFF(COALESCE(m.fecha_fin, '9999-12-31'), COALESCE(m.fecha_inicio, '1000-01-01')) ASC,
+                         m.creado_en DESC
                 LIMIT 1";
         $result = $this->db->executeSQL($sql);
-        return (is_array($result) && count($result) > 0) ? $result[0] : null;
+        if (!is_array($result) || count($result) === 0) {
+            return null;
+        }
+        $menu = $result[0];
+        $menu->dias = $this->getDias($menu->id_menu);
+        return $menu;
     }
 
     public function getProductosPorMenu($id)
@@ -94,18 +146,21 @@ class MenuModel
 
     public function create($data)
     {
+        $tipo = ($data['tipo_disponibilidad'] ?? 'fechas') === 'dias' ? 'dias' : 'fechas';
         $nombre = $this->db_escape($data['nombre']);
         $descripcion = $this->db_escape($data['descripcion'] ?? '');
-        $fInicio = $this->db_escape($data['fecha_inicio']);
-        $fFin = $this->db_escape($data['fecha_fin']);
         $hInicio = $this->db_escape($data['hora_inicio']);
         $hFin = $this->db_escape($data['hora_fin']);
+        // Las fechas solo se guardan para el tipo 'fechas'
+        $fInicio = $tipo === 'fechas' ? "'" . $this->db_escape($data['fecha_inicio']) . "'" : 'NULL';
+        $fFin = $tipo === 'fechas' ? "'" . $this->db_escape($data['fecha_fin']) . "'" : 'NULL';
 
-        $sql = "INSERT INTO menu (nombre, descripcion, fecha_inicio, fecha_fin, hora_inicio, hora_fin, esta_activo)
-                VALUES ('$nombre', '$descripcion', '$fInicio', '$fFin', '$hInicio', '$hFin', 1)";
+        $sql = "INSERT INTO menu (nombre, descripcion, tipo_disponibilidad, fecha_inicio, fecha_fin, hora_inicio, hora_fin, esta_activo)
+                VALUES ('$nombre', '$descripcion', '$tipo', $fInicio, $fFin, '$hInicio', '$hFin', 1)";
         $idMenu = $this->db->executeSQL_DML_last($sql);
 
         if ($idMenu) {
+            if ($tipo === 'dias') $this->setDias($idMenu, $data['dias'] ?? []);
             if (!empty($data['productos'])) $this->setProductos($idMenu, $data['productos']);
             if (!empty($data['combos'])) $this->setCombos($idMenu, $data['combos']);
         }
@@ -115,26 +170,58 @@ class MenuModel
     public function update($id, $data)
     {
         $id = intval($id);
+        $tipo = ($data['tipo_disponibilidad'] ?? 'fechas') === 'dias' ? 'dias' : 'fechas';
         $nombre = $this->db_escape($data['nombre']);
         $descripcion = $this->db_escape($data['descripcion'] ?? '');
-        $fInicio = $this->db_escape($data['fecha_inicio']);
-        $fFin = $this->db_escape($data['fecha_fin']);
         $hInicio = $this->db_escape($data['hora_inicio']);
         $hFin = $this->db_escape($data['hora_fin']);
+        $fInicio = $tipo === 'fechas' ? "'" . $this->db_escape($data['fecha_inicio']) . "'" : 'NULL';
+        $fFin = $tipo === 'fechas' ? "'" . $this->db_escape($data['fecha_fin']) . "'" : 'NULL';
 
         $sql = "UPDATE menu
                 SET nombre = '$nombre',
                     descripcion = '$descripcion',
-                    fecha_inicio = '$fInicio',
-                    fecha_fin = '$fFin',
+                    tipo_disponibilidad = '$tipo',
+                    fecha_inicio = $fInicio,
+                    fecha_fin = $fFin,
                     hora_inicio = '$hInicio',
                     hora_fin = '$hFin'
                 WHERE id_menu = $id";
         $this->db->executeSQL_DML($sql);
 
+        // Reemplaza los días: si es por fechas, se limpian.
+        $this->setDias($id, $tipo === 'dias' ? ($data['dias'] ?? []) : []);
         if (isset($data['productos'])) $this->setProductos($id, $data['productos']);
         if (isset($data['combos'])) $this->setCombos($id, $data['combos']);
         return true;
+    }
+
+    public function setActivo($id, $activo)
+    {
+        $id = intval($id);
+        $activo = $activo ? 1 : 0;
+        $sql = "UPDATE menu SET esta_activo = $activo WHERE id_menu = $id";
+        return $this->db->executeSQL_DML($sql);
+    }
+
+    private function setDias($idMenu, $dias)
+    {
+        $idMenu = intval($idMenu);
+        $this->db->executeSQL_DML("DELETE FROM menu_dia WHERE id_menu = $idMenu");
+        if (empty($dias) || !is_array($dias)) return;
+
+        $values = [];
+        $vistos = [];
+        foreach ($dias as $d) {
+            $dia = intval($d);
+            if ($dia >= 0 && $dia <= 6 && !in_array($dia, $vistos, true)) {
+                $values[] = "($idMenu, $dia)";
+                $vistos[] = $dia;
+            }
+        }
+        if (!empty($values)) {
+            $this->db->executeSQL_DML("INSERT INTO menu_dia (id_menu, dia_semana) VALUES " . implode(',', $values));
+        }
     }
 
     private function setProductos($idMenu, $productos)
@@ -175,6 +262,16 @@ class MenuModel
         if (!empty($values)) {
             $this->db->executeSQL_DML("INSERT INTO menu_combo (id_menu, id_combo, orden_display) VALUES " . implode(',', $values));
         }
+    }
+
+    // Adjunta el arreglo de días a cada menú de una lista (para listados).
+    private function adjuntarDias($menus)
+    {
+        if (!is_array($menus)) return $menus;
+        foreach ($menus as $menu) {
+            $menu->dias = $menu->tipo_disponibilidad === 'dias' ? $this->getDias($menu->id_menu) : [];
+        }
+        return $menus;
     }
 
     private function db_escape($value)

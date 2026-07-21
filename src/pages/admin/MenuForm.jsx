@@ -4,13 +4,16 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import toast from 'react-hot-toast';
-import { TextField, Autocomplete, Chip } from '@mui/material';
 import {
-  menuService,
-  productoService,
-  comboService,
-} from '../../services/api';
-import { extraerErrorAPI } from '../../utils/format';
+  TextField,
+  MenuItem,
+  Autocomplete,
+  Chip,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material';
+import { menuService, productoService, comboService } from '../../services/api';
+import { extraerErrorAPI, DIAS_SEMANA } from '../../utils/format';
 import './admin-common.css';
 
 const schema = yup.object({
@@ -21,23 +24,49 @@ const schema = yup.object({
     .max(150, 'No puede exceder 150 caracteres')
     .trim(),
   descripcion: yup.string().optional(),
-  fecha_inicio: yup
+  tipo_disponibilidad: yup
     .string()
-    .required('La fecha de inicio es obligatoria')
-    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (AAAA-MM-DD)'),
-  fecha_fin: yup
-    .string()
-    .required('La fecha final es obligatoria')
-    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (AAAA-MM-DD)')
-    .test(
-      'rango-fechas',
-      'La fecha final no puede ser anterior a la fecha de inicio',
-      function (value) {
-        const { fecha_inicio } = this.parent;
-        if (!fecha_inicio || !value) return true;
-        return new Date(value) >= new Date(fecha_inicio);
-      }
-    ),
+    .oneOf(['fechas', 'dias'], 'Seleccioná un tipo de disponibilidad')
+    .required('Seleccioná un tipo de disponibilidad'),
+  fecha_inicio: yup.string().when('tipo_disponibilidad', {
+    is: 'fechas',
+    then: (s) =>
+      s
+        .required('La fecha de inicio es obligatoria')
+        .matches(
+          /^\d{4}-\d{2}-\d{2}$/,
+          'Formato de fecha inválido (AAAA-MM-DD)',
+        ),
+    otherwise: (s) => s.optional(),
+  }),
+  fecha_fin: yup.string().when('tipo_disponibilidad', {
+    is: 'fechas',
+    then: (s) =>
+      s
+        .required('La fecha final es obligatoria')
+        .matches(
+          /^\d{4}-\d{2}-\d{2}$/,
+          'Formato de fecha inválido (AAAA-MM-DD)',
+        )
+        .test(
+          'rango-fechas',
+          'La fecha final no puede ser anterior a la fecha de inicio',
+          function (value) {
+            const { fecha_inicio } = this.parent;
+            if (!fecha_inicio || !value) return true;
+            return new Date(value) >= new Date(fecha_inicio);
+          },
+        ),
+    otherwise: (s) => s.optional(),
+  }),
+  dias: yup
+    .array()
+    .of(yup.number())
+    .when('tipo_disponibilidad', {
+      is: 'dias',
+      then: (s) => s.min(1, 'Seleccioná al menos un día de la semana'),
+      otherwise: (s) => s.optional(),
+    }),
   hora_inicio: yup
     .string()
     .required('La hora de inicio es obligatoria')
@@ -53,10 +82,16 @@ const schema = yup.object({
         const { hora_inicio } = this.parent;
         if (!hora_inicio || !value) return true;
         return hora_inicio < value;
-      }
+      },
     ),
-  productos: yup.array().of(yup.object({ id_producto: yup.number().required() })).default([]),
-  combos: yup.array().of(yup.object({ id_combo: yup.number().required() })).default([]),
+  productos: yup
+    .array()
+    .of(yup.object({ id_producto: yup.number().required() }))
+    .default([]),
+  combos: yup
+    .array()
+    .of(yup.object({ id_combo: yup.number().required() }))
+    .default([]),
 });
 
 const normalizarHora = (valor) => (valor ? valor.substring(0, 5) : '');
@@ -78,20 +113,25 @@ function MenuForm() {
     control,
     reset,
     setError,
+    watch,
     formState: { errors, isDirty },
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       nombre: '',
       descripcion: '',
+      tipo_disponibilidad: 'dias',
       fecha_inicio: '',
       fecha_fin: '',
+      dias: [],
       hora_inicio: '',
       hora_fin: '',
       productos: [],
       combos: [],
     },
   });
+
+  const tipoDisponibilidad = watch('tipo_disponibilidad');
 
   useEffect(() => {
     const cargarTodo = async () => {
@@ -109,8 +149,10 @@ function MenuForm() {
           reset({
             nombre: m.nombre || '',
             descripcion: m.descripcion || '',
+            tipo_disponibilidad: m.tipo_disponibilidad || 'fechas',
             fecha_inicio: m.fecha_inicio || '',
             fecha_fin: m.fecha_fin || '',
+            dias: (m.dias || []).map(Number),
             hora_inicio: normalizarHora(m.hora_inicio),
             hora_fin: normalizarHora(m.hora_fin),
             productos: (m.productos || []).map((p) => ({
@@ -134,7 +176,8 @@ function MenuForm() {
   }, [id, esEdicion, reset, navigate]);
 
   const onSubmit = async (data) => {
-    const totalItems = (data.productos?.length || 0) + (data.combos?.length || 0);
+    const totalItems =
+      (data.productos?.length || 0) + (data.combos?.length || 0);
     if (totalItems === 0) {
       setTieneContenido(false);
       toast.error('El menú debe incluir al menos un producto o combo');
@@ -146,18 +189,29 @@ function MenuForm() {
       const payload = {
         nombre: data.nombre.trim(),
         descripcion: data.descripcion?.trim() || '',
-        fecha_inicio: data.fecha_inicio,
-        fecha_fin: data.fecha_fin,
+        tipo_disponibilidad: data.tipo_disponibilidad,
         hora_inicio: data.hora_inicio,
         hora_fin: data.hora_fin,
-        productos: data.productos.map((p) => ({ id_producto: Number(p.id_producto) })),
+        productos: data.productos.map((p) => ({
+          id_producto: Number(p.id_producto),
+        })),
         combos: data.combos.map((c) => ({ id_combo: Number(c.id_combo) })),
       };
+      if (data.tipo_disponibilidad === 'fechas') {
+        payload.fecha_inicio = data.fecha_inicio;
+        payload.fecha_fin = data.fecha_fin;
+      } else {
+        payload.dias = (data.dias || []).map(Number);
+      }
       if (esEdicion) payload.id_menu = Number(id);
 
-      const res = esEdicion ? await menuService.update(payload) : await menuService.create(payload);
+      const res = esEdicion
+        ? await menuService.update(payload)
+        : await menuService.create(payload);
       toast.success(
-        esEdicion ? `Menú "${res.data.nombre}" actualizado` : `Menú "${res.data.nombre}" creado`
+        esEdicion
+          ? `Menú "${res.data.nombre}" actualizado`
+          : `Menú "${res.data.nombre}" creado`,
       );
       navigate('/admin/menus');
     } catch (err) {
@@ -167,7 +221,8 @@ function MenuForm() {
         toast.error(data.mensaje);
       } else if (data?.errores) {
         Object.entries(data.errores).forEach(([campo, mensaje]) => {
-          if (campo in schema.fields) setError(campo, { type: 'server', message: mensaje });
+          if (campo in schema.fields)
+            setError(campo, { type: 'server', message: mensaje });
           if (campo === 'contenido') setTieneContenido(false);
         });
         toast.error('Revisá los campos con error');
@@ -184,13 +239,19 @@ function MenuForm() {
   return (
     <div className="admin-menu-form">
       <div className="page-header">
-        <Link to="/admin/menus" className="admin-form-back">&larr; Volver al listado</Link>
+        <Link to="/admin/menus" className="admin-form-back">
+          &larr; Volver al listado
+        </Link>
         <h1>{esEdicion ? 'Modificar menú' : 'Nuevo menú'}</h1>
-        <p>Configurá las fechas, horas y contenido del menú</p>
+        <p>Configurá la disponibilidad, horas y contenido del menú</p>
       </div>
 
       <div className="page-content">
-        <form className="admin-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form
+          className="admin-form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
           <div className="admin-form-grid">
             <div className="admin-form-full">
               <TextField
@@ -198,7 +259,9 @@ function MenuForm() {
                 fullWidth
                 {...register('nombre')}
                 error={Boolean(errors.nombre)}
-                helperText={errors.nombre?.message || 'Debe ser un nombre único'}
+                helperText={
+                  errors.nombre?.message || 'Debe ser un nombre único'
+                }
               />
             </div>
 
@@ -214,31 +277,94 @@ function MenuForm() {
               />
             </div>
 
-            <div>
-              <TextField
-                label="Fecha de inicio *"
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                slotProps={{ inputLabel: { shrink: true } }}
-                {...register('fecha_inicio')}
-                error={Boolean(errors.fecha_inicio)}
-                helperText={errors.fecha_inicio?.message}
+            <div className="admin-form-full">
+              <Controller
+                name="tipo_disponibilidad"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    select
+                    fullWidth
+                    label="Disponibilidad por *"
+                    error={Boolean(errors.tipo_disponibilidad)}
+                    helperText={
+                      errors.tipo_disponibilidad?.message ||
+                      'Elegí si el menú se rige por un rango de fechas o por días de la semana'
+                    }
+                  >
+                    <MenuItem value="dias">Días de la semana</MenuItem>
+                    <MenuItem value="fechas">Rango de fechas</MenuItem>
+                  </TextField>
+                )}
               />
             </div>
 
-            <div>
-              <TextField
-                label="Fecha final *"
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                slotProps={{ inputLabel: { shrink: true } }}
-                {...register('fecha_fin')}
-                error={Boolean(errors.fecha_fin)}
-                helperText={errors.fecha_fin?.message}
-              />
-            </div>
+            {tipoDisponibilidad === 'fechas' ? (
+              <>
+                <div>
+                  <TextField
+                    label="Fecha de inicio *"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    {...register('fecha_inicio')}
+                    error={Boolean(errors.fecha_inicio)}
+                    helperText={errors.fecha_inicio?.message}
+                  />
+                </div>
+                <div>
+                  <TextField
+                    label="Fecha final *"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    {...register('fecha_fin')}
+                    error={Boolean(errors.fecha_fin)}
+                    helperText={errors.fecha_fin?.message}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="admin-form-full">
+                <label className="admin-field-label">Días de la semana *</label>
+                <Controller
+                  name="dias"
+                  control={control}
+                  render={({ field }) => (
+                    <ToggleButtonGroup
+                      value={field.value || []}
+                      onChange={(_, val) => field.onChange(val)}
+                      aria-label="Días de disponibilidad"
+                      sx={{ flexWrap: 'wrap', gap: 1, mt: 1 }}
+                    >
+                      {DIAS_SEMANA.map((d) => (
+                        <ToggleButton
+                          key={d.valor}
+                          value={d.valor}
+                          sx={{ borderRadius: '8px !important', px: 2 }}
+                        >
+                          {d.corto}
+                        </ToggleButton>
+                      ))}
+                    </ToggleButtonGroup>
+                  )}
+                />
+                {errors.dias && (
+                  <p
+                    style={{
+                      color: '#c53030',
+                      fontSize: '0.8rem',
+                      marginTop: 6,
+                    }}
+                  >
+                    {errors.dias.message}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div>
               <TextField
@@ -281,7 +407,9 @@ function MenuForm() {
                     }))}
                     value={field.value || []}
                     onChange={(_, val) => field.onChange(val)}
-                    isOptionEqualToValue={(o, v) => o.id_producto === v.id_producto}
+                    isOptionEqualToValue={(o, v) =>
+                      o.id_producto === v.id_producto
+                    }
                     getOptionLabel={(o) => o.nombre || ''}
                     renderTags={(value, getTagProps) =>
                       value.map((opt, idx) => (
@@ -362,7 +490,11 @@ function MenuForm() {
               className="admin-btn"
               disabled={enviando || (esEdicion && !isDirty)}
             >
-              {enviando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Crear menú'}
+              {enviando
+                ? 'Guardando...'
+                : esEdicion
+                  ? 'Guardar cambios'
+                  : 'Crear menú'}
             </button>
           </div>
         </form>

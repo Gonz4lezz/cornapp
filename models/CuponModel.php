@@ -93,6 +93,13 @@ class CuponModel
         return (is_array($result) && count($result) > 0) ? $result[0] : null;
     }
 
+    public function setActivo($id, $activo)
+    {
+        $id = intval($id);
+        $activo = $activo ? 1 : 0;
+        return $this->db->executeSQL_DML("UPDATE cupon SET esta_activo = $activo WHERE id_cupon = $id");
+    }
+
     public function existeCodigo($codigo, $idExcluir = null)
     {
         $codigo = $this->db_escape($codigo);

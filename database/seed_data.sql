@@ -323,33 +323,25 @@ INSERT INTO imagen_combo (id_combo, url_imagen, texto_alt, es_principal) VALUES
 -- MENÚS
 -- ============================================================
 
-INSERT INTO menu (nombre, descripcion, fecha_inicio, fecha_fin, hora_inicio, hora_fin, esta_activo) VALUES
-    ('Menú del Día',          'Nuestro menú principal disponible durante toda la temporada regular.', '2026-01-01', '2026-12-31', '10:00:00', '21:00:00', TRUE),
-    ('Menú de Fin de Semana', 'Menú especial con combos exclusivos para los fines de semana.',        '2026-01-01', '2026-12-31', '11:00:00', '22:00:00', TRUE),
-    ('Menú Desayuno',         'Menú ideal para comenzar tu día con energía, disponible de 8am a 10am.', '2026-01-01', '2026-12-31', '08:00:00', '10:00:00', TRUE),
-    ('Menú Feria del Maíz',   'Menú temático de la Feria del Maíz de julio, disponible por tiempo limitado.', '2026-07-01', '2026-07-31', '10:00:00', '22:00:00', TRUE);
+-- Menús 1-3 por DÍAS de la semana; menú 4 por RANGO de fechas.
+INSERT INTO menu (nombre, descripcion, tipo_disponibilidad, fecha_inicio, fecha_fin, hora_inicio, hora_fin, esta_activo) VALUES
+    ('Menú del Día',          'Nuestro menú principal disponible de lunes a sábado.',                         'dias',   NULL,         NULL,         '10:00:00', '21:00:00', TRUE),
+    ('Menú de Fin de Semana', 'Menú especial con combos exclusivos para sábados y domingos.',                 'dias',   NULL,         NULL,         '11:00:00', '22:00:00', TRUE),
+    ('Menú Desayuno',         'Menú ideal para comenzar tu día con energía, de lunes a viernes de 8am a 10am.', 'dias',   NULL,         NULL,         '08:00:00', '10:00:00', TRUE),
+    ('Menú Feria del Maíz',   'Menú temático de la Feria del Maíz de julio, disponible por tiempo limitado.', 'fechas', '2026-07-01', '2026-07-31', '10:00:00', '22:00:00', TRUE);
 
--- Horarios Menú del Día (lun-sáb 10am-9pm)
-INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
-    (1, 1, '10:00:00', '21:00:00'),
-    (1, 2, '10:00:00', '21:00:00'),
-    (1, 3, '10:00:00', '21:00:00'),
-    (1, 4, '10:00:00', '21:00:00'),
-    (1, 5, '10:00:00', '21:00:00'),
-    (1, 6, '10:00:00', '21:00:00');
+-- Días de disponibilidad (0=Domingo ... 6=Sábado)
+-- Menú del Día: lunes a sábado
+INSERT INTO menu_dia (id_menu, dia_semana) VALUES
+    (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6);
 
--- Horarios Fin de Semana (sáb-dom 11am-10pm)
-INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
-    (2, 6, '11:00:00', '22:00:00'),
-    (2, 0, '11:00:00', '22:00:00');
+-- Menú de Fin de Semana: sábado y domingo
+INSERT INTO menu_dia (id_menu, dia_semana) VALUES
+    (2, 6), (2, 0);
 
--- Horarios Menú Desayuno (lun-vie 8am-10am)
-INSERT INTO horario_menu (id_menu, dia_semana, hora_inicio, hora_fin) VALUES
-    (3, 1, '08:00:00', '10:00:00'),
-    (3, 2, '08:00:00', '10:00:00'),
-    (3, 3, '08:00:00', '10:00:00'),
-    (3, 4, '08:00:00', '10:00:00'),
-    (3, 5, '08:00:00', '10:00:00');
+-- Menú Desayuno: lunes a viernes
+INSERT INTO menu_dia (id_menu, dia_semana) VALUES
+    (3, 1), (3, 2), (3, 3), (3, 4), (3, 5);
 
 
 -- Productos en Menú del Día

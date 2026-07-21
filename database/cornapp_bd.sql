@@ -199,18 +199,29 @@ CREATE TABLE imagen_combo (
 -- ============================================================
 
 CREATE TABLE menu (
-    id_menu       INT          NOT NULL AUTO_INCREMENT,
-    nombre        VARCHAR(150) NOT NULL,
-    descripcion   TEXT,
-    fecha_inicio  DATE         NULL,
-    fecha_fin     DATE         NULL,
-    hora_inicio   TIME         NULL,
-    hora_fin      TIME         NULL,
-    esta_activo   BOOLEAN      NOT NULL DEFAULT TRUE,
-    creado_en     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    editado_en    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id_menu             INT          NOT NULL AUTO_INCREMENT,
+    nombre              VARCHAR(150) NOT NULL,
+    descripcion         TEXT,
+    -- Un menú se define por rango de fechas O por días de la semana (no ambos)
+    tipo_disponibilidad ENUM('fechas','dias') NOT NULL DEFAULT 'fechas',
+    fecha_inicio        DATE         NULL,      -- solo cuando tipo_disponibilidad = 'fechas'
+    fecha_fin           DATE         NULL,
+    hora_inicio         TIME         NULL,
+    hora_fin            TIME         NULL,
+    esta_activo         BOOLEAN      NOT NULL DEFAULT TRUE,
+    creado_en           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    editado_en          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_menu),
     UNIQUE KEY uq_menu_nombre (nombre)
+);
+
+-- Días de la semana en que un menú está disponible (cuando tipo_disponibilidad = 'dias')
+-- dia_semana: 0=Domingo, 1=Lunes ... 6=Sábado
+CREATE TABLE menu_dia (
+    id_menu    INT     NOT NULL,
+    dia_semana TINYINT NOT NULL,
+    PRIMARY KEY (id_menu, dia_semana),
+    CONSTRAINT fk_menu_dia_menu FOREIGN KEY (id_menu) REFERENCES menu (id_menu) ON DELETE CASCADE
 );
 
 CREATE TABLE horario_menu (
