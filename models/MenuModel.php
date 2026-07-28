@@ -196,6 +196,32 @@ class MenuModel
         return true;
     }
 
+    // Menús por rango de fechas que ya vencieron (fecha_fin pasada) y siguen
+    // activos. Los menús por días no vencen (son recurrentes).
+    public function getVencidos()
+    {
+        $sql = "SELECT id_menu, nombre, fecha_fin
+                FROM menu
+                WHERE esta_activo = 1
+                  AND tipo_disponibilidad = 'fechas'
+                  AND fecha_fin IS NOT NULL
+                  AND fecha_fin < CURDATE()
+                ORDER BY fecha_fin ASC";
+        $result = $this->db->executeSQL($sql);
+        return is_array($result) ? $result : [];
+    }
+
+    // Tarea: desactiva (borrado lógico) los menús vencidos y devuelve la
+    // lista de los que se desactivaron (para el log de la tarea programada).
+    public function desactivarVencidos()
+    {
+        $vencidos = $this->getVencidos();
+        foreach ($vencidos as $menu) {
+            $this->setActivo($menu->id_menu, false);
+        }
+        return $vencidos;
+    }
+
     public function setActivo($id, $activo)
     {
         $id = intval($id);

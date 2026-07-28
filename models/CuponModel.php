@@ -100,6 +100,29 @@ class CuponModel
         return $this->db->executeSQL_DML("UPDATE cupon SET esta_activo = $activo WHERE id_cupon = $id");
     }
 
+    // Cupones cuya vigencia ya terminó (fecha_fin pasada) y siguen activos.
+    public function getVencidos()
+    {
+        $sql = "SELECT id_cupon, codigo, nombre, fecha_fin
+                FROM cupon
+                WHERE esta_activo = 1
+                  AND fecha_fin < NOW()
+                ORDER BY fecha_fin ASC";
+        $result = $this->db->executeSQL($sql);
+        return is_array($result) ? $result : [];
+    }
+
+    // Tarea: desactiva (borrado lógico) los cupones vencidos y devuelve la
+    // lista de los que se desactivaron (para el log de la tarea programada).
+    public function desactivarVencidos()
+    {
+        $vencidos = $this->getVencidos();
+        foreach ($vencidos as $cupon) {
+            $this->setActivo($cupon->id_cupon, false);
+        }
+        return $vencidos;
+    }
+
     public function existeCodigo($codigo, $idExcluir = null)
     {
         $codigo = $this->db_escape($codigo);
