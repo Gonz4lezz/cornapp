@@ -34,7 +34,7 @@ try {
     $lineas[] = "  ERROR al ejecutar la tarea: " . $e->getMessage();
 }
 
-$logDir = $base . '/cron/logs';
+$logDir = $base . '/tasks/logs';
 if (!is_dir($logDir)) {
     mkdir($logDir, 0755, true);
 }
