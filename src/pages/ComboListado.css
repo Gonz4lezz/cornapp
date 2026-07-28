@@ -84,6 +84,7 @@
   font-weight: 700;
   color: var(--secondary);
   margin-top: 8px;
+  text-align: end;
 }
 
 @media (max-width: 768px) {

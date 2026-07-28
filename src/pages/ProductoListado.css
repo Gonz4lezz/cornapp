@@ -92,6 +92,7 @@
   font-weight: 700;
   color: var(--secondary);
   margin-top: 4px;
+  text-align: end;
 }
 
 @media (max-width: 768px) {
