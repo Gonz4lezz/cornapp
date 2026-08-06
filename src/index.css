@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --primary: #FFFFFF;
-  --secondary: #FF8E42;
-  --secondary-light: #FFA964;
-  --secondary-dark: #E67A35;
+  --primary: #ffffff;
+  --secondary: #ff8e42;
+  --secondary-light: #ffa964;
+  --secondary-dark: #e67a35;
   --tertiary: #211206;
   --text: #333333;
   --text-light: #666666;
-  --text-on-dark: #FFFFFF;
-  --bg: #FFFFFF;
-  --bg-light: #FFF8F3;
-  --bg-card: #FFFFFF;
-  --border: #E5E5E5;
+  --text-on-dark: #ffffff;
+  --bg: #ffffff;
+  --bg-light: #fff8f3;
+  --bg-card: #ffffff;
+  --border: #e5e5e5;
   --shadow: 0 2px 8px rgba(33, 18, 6, 0.1);
   --shadow-hover: 0 4px 16px rgba(33, 18, 6, 0.15);
   --radius: 12px;
@@ -53,7 +53,10 @@ a:hover {
   color: var(--secondary-dark);
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   color: var(--tertiary);
   font-weight: 600;
   line-height: 1.3;
@@ -62,32 +65,4 @@ h1, h2, h3, h4 {
 img {
   max-width: 100%;
   height: auto;
-}
-
-#google_translate_element {
-  position: fixed;
-  top: 15px;
-  right: 10px;
-  z-index: 9999;
-  background: #fff;
-  padding: 5px 10px;
-  border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  font-size: 14px;
-}
-.goog-te-gadget img {
-  display: none; /* Hide Google branding flag icon */
-}
-
-.goog-te-gadget-simple{
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-
-.goog-te-gadget-simple span{
-  color: var(--text) !important;
-  font-size: 14px !important;
-  border-left: none !important;
 }

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import './Layout.css';
@@ -12,40 +13,57 @@ const navLinks = [
   { to: '/admin', label: 'Mantenimiento' },
 ];
 
-// Integrantes del equipo DEVSHARKS (se muestran en el footer)
-const integrantes = ['Jurgen Calvo González', 'Keisy Monge', 'Sebastian Hernandez'];
+const integrantes = [
+  'Jurgen Calvo González',
+  'Keisy Monge',
+  'Sebastian Hernandez',
+];
 
 function Layout({ children }) {
   const location = useLocation();
+  const translateRef = useRef(null);
+
+  useEffect(() => {
+    const widget = document.getElementById('google_translate_element');
+    if (
+      widget &&
+      translateRef.current &&
+      widget.parentNode !== translateRef.current
+    ) {
+      translateRef.current.appendChild(widget);
+    }
+  }, []);
 
   return (
     <>
       <nav className="navbar">
         <div className="navbar-container">
           <Link to="/" className="navbar-logo">
-            <span className="logo-icon">
-              <img src="/assets/cornapp-logo.png" alt="Logo" />
-            </span>
+            <span className="logo-icon"></span>
             <span className="logo-text">CornApp</span>
           </Link>
 
-          <ul className="navbar-links">
-            {navLinks.map((link) => (
-              <li key={link.to}>
-                <Link
-                  to={link.to}
-                  className={
-                    location.pathname === link.to ||
-                    (link.to !== '/' && location.pathname.startsWith(link.to))
-                      ? 'active'
-                      : ''
-                  }
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="navbar-right">
+            <ul className="navbar-links">
+              {navLinks.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className={
+                      location.pathname === link.to ||
+                      (link.to !== '/' && location.pathname.startsWith(link.to))
+                        ? 'active'
+                        : ''
+                    }
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="navbar-translate" ref={translateRef}></div>
+          </div>
         </div>
       </nav>
 
@@ -55,9 +73,7 @@ function Layout({ children }) {
         <div className="footer-container">
           <div className="footer-grid">
             <div className="footer-col footer-brand">
-              <span className="footer-logo">
-                <img src="/assets/cornapp-logo-nombre.png" alt="Logo" />
-              </span>
+              <span className="footer-logo">CornApp</span>
               <p className="footer-tagline">
                 Auténticos corn dogs coreanos, crujientes por fuera e
                 irresistibles por dentro. Hechos al momento con los mejores
@@ -93,7 +109,7 @@ function Layout({ children }) {
                 <li>📍 Alajuela, Costa Rica</li>
                 <li>📞 +506 0000-0000</li>
                 <li>✉️ cornapp@gmail.com</li>
-                <li>🕒 Lun a Dom · 10:00 a. m. - 9:00 p. m.</li>
+                <li>🕒 Lun a Dom · 10:00 a. m. – 9:00 p. m.</li>
               </ul>
             </div>
 
@@ -108,9 +124,7 @@ function Layout({ children }) {
           </div>
 
           <div className="footer-bottom">
-            <p>
-              &copy; 2026 CornApp - Equipo DEVSHARKS.
-            </p>
+            <p>&copy; 2026 CornApp — Equipo DEVSHARKS.</p>
           </div>
         </div>
       </footer>

@@ -32,7 +32,15 @@
 
 .logo-icon {
   font-size: 1.6rem;
-  width: 66px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-translate {
   display: flex;
   align-items: center;
 }
@@ -170,6 +178,12 @@
     height: auto;
     padding: 12px 16px;
     gap: 8px;
+  }
+
+  .navbar-right {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
   }
 
   .navbar-links {
