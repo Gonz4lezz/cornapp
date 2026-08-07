@@ -351,6 +351,7 @@ CREATE TABLE detalle_pedido (
     cantidad                 INT           NOT NULL DEFAULT 1,
     precio_unitario          DECIMAL(10,2) NOT NULL,
     precio_total             DECIMAL(10,2) NOT NULL,
+    monto_descuento          DECIMAL(10,2) NOT NULL DEFAULT 0.00,   -- Descuento aplicado a la línea (cupones)
     observaciones            TEXT,
     PRIMARY KEY (id_detalle),
     CONSTRAINT chk_detalle_pedido_item CHECK (
@@ -490,16 +491,16 @@ CREATE TABLE envio (
     id_envio            INT           NOT NULL AUTO_INCREMENT,
     id_pedido           INT           NOT NULL,
     id_tarifa           INT           NULL,
-    repartidor          VARCHAR(100)  NOT NULL,          -- Nombre del repartidor asignado
+    repartidor          VARCHAR(100)  NULL,              -- Nombre del repartidor asignado (se asigna en la entrega, Avance 6)
     costo_envio         DECIMAL(8,2)  NOT NULL,
-    distancia_km        DECIMAL(6,2)  NOT NULL,          -- Kilómetros calculados desde el local
-    -- Dirección capturada desde el mapa (no reutilizable)
-    direccion_texto     VARCHAR(500)  NOT NULL,          -- Dirección legible generada del mapa
-    latitud             DECIMAL(10,8) NOT NULL,          -- Coordenada del punto elegido en el mapa
-    longitud            DECIMAL(11,8) NOT NULL,
+    distancia_km        DECIMAL(6,2)  NULL,              -- Kilómetros calculados desde el local (mapa, Avance 6)
+    -- Dirección capturada al momento del pedido (el mapa llega en el Avance 6)
+    direccion_texto     VARCHAR(500)  NOT NULL,          -- Dirección legible indicada por el cliente
+    latitud             DECIMAL(10,8) NULL,              -- Coordenada del punto elegido en el mapa (Avance 6)
+    longitud            DECIMAL(11,8) NULL,
     referencia          TEXT,                            -- Señas adicionales del cliente
-    nombre_receptor     VARCHAR(200)  NOT NULL,
-    telefono_receptor   VARCHAR(20)   NOT NULL,
+    nombre_receptor     VARCHAR(200)  NULL,
+    telefono_receptor   VARCHAR(20)   NULL,
     -- Timestamps de seguimiento del envío
     tstamp_salida       TIMESTAMP     NULL,              -- Cuando el repartidor sale del local
     tstamp_entrega      TIMESTAMP     NULL,              -- Cuando el pedido llega al cliente
@@ -527,10 +528,13 @@ CREATE TABLE orden_cocina (
     CONSTRAINT fk_orden_cocina_pedido FOREIGN KEY (id_pedido) REFERENCES pedido (id_pedido)
 );
 
+-- Un item por producto individual: los combos se descomponen en sus productos
 CREATE TABLE item_orden_cocina (
     id_item_cocina            INT       NOT NULL AUTO_INCREMENT,
     id_orden_cocina           INT       NOT NULL,
     id_detalle                INT       NOT NULL,        -- Referencia al detalle del pedido
+    id_producto               INT       NOT NULL,        -- Producto individual (los combos se descomponen)
+    cantidad                  INT       NOT NULL DEFAULT 1,
     id_estacion_actual        INT       NULL,
     estado                    ENUM('pendiente','en_proceso','completado') NOT NULL DEFAULT 'pendiente',
     completado_por_usuario_id INT       NULL,
@@ -539,6 +543,7 @@ CREATE TABLE item_orden_cocina (
     PRIMARY KEY (id_item_cocina),
     CONSTRAINT fk_item_orden_cocina_orden    FOREIGN KEY (id_orden_cocina)           REFERENCES orden_cocina   (id_orden_cocina) ON DELETE CASCADE,
     CONSTRAINT fk_item_orden_cocina_detalle  FOREIGN KEY (id_detalle)                REFERENCES detalle_pedido (id_detalle),
+    CONSTRAINT fk_item_orden_cocina_producto FOREIGN KEY (id_producto)               REFERENCES producto        (id_producto),
     CONSTRAINT fk_item_orden_cocina_estacion FOREIGN KEY (id_estacion_actual)        REFERENCES estacion_cocina (id_estacion),
     CONSTRAINT fk_item_orden_cocina_usuario  FOREIGN KEY (completado_por_usuario_id) REFERENCES usuario         (id_usuario)
 );
@@ -566,6 +571,7 @@ CREATE TABLE carrito_compra (
     id_producto INT       NULL,
     id_combo    INT       NULL,
     cantidad    INT       NOT NULL DEFAULT 1,
+    observaciones TEXT,                                  -- Observaciones de preparación por línea
     creado_en   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     editado_en  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_carrito),
@@ -586,6 +592,16 @@ CREATE TABLE personalizacion_carrito (
         REFERENCES carrito_compra (id_carrito) ON DELETE CASCADE,
     CONSTRAINT fk_personalizacion_carrito_opcion  FOREIGN KEY (id_opcion_personalizacion)
         REFERENCES opcion_personalizacion (id_opcion_personalizacion)
+);
+
+-- Cupones aplicados al carrito del usuario (se trasladan al pedido al confirmar)
+CREATE TABLE carrito_cupon (
+    id_usuario INT       NOT NULL,
+    id_cupon   INT       NOT NULL,
+    creado_en  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_usuario, id_cupon),
+    CONSTRAINT fk_carrito_cupon_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_carrito_cupon_cupon   FOREIGN KEY (id_cupon)   REFERENCES cupon   (id_cupon)   ON DELETE CASCADE
 );
 
 -- ============================================================
