@@ -21,6 +21,7 @@ class MenuController
 
     public function mantenimiento()
     {
+        Auth::requerir(['Administrador']);
         $menus = $this->model->getAllMantenimiento();
         $this->response->status(200)->toJSON($menus ?? []);
     }
@@ -56,6 +57,7 @@ class MenuController
 
     public function create()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $errores = $this->validar($data);
         if (!empty($errores)) {
@@ -80,6 +82,7 @@ class MenuController
 
     public function update()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $id = intval($data['id_menu'] ?? 0);
         if ($id <= 0) {
@@ -115,6 +118,7 @@ class MenuController
 
     private function cambiarEstado($activo)
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $id = intval($data['id_menu'] ?? 0);
         if ($id <= 0) {

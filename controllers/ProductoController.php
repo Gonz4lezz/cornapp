@@ -35,6 +35,7 @@ class ProductoController
 
     public function mantenimiento()
     {
+        Auth::requerir(['Administrador']);
         $productos = $this->model->getAllMantenimiento();
         $this->response->status(200)->toJSON($productos ?? []);
     }
@@ -51,6 +52,7 @@ class ProductoController
 
     private function cambiarEstado($activo)
     {
+        Auth::requerir(['Administrador']);
         $data = $this->request->getJSON();
         $id = intval($data->id_producto ?? 0);
         if ($id <= 0) {
@@ -63,6 +65,7 @@ class ProductoController
 
     public function create()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $errores = $this->validar($data);
         if (!empty($errores)) {
@@ -102,6 +105,7 @@ class ProductoController
 
     public function update()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $id = intval($data['id_producto'] ?? 0);
         if ($id <= 0) {

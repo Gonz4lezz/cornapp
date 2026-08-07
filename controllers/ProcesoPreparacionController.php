@@ -34,6 +34,7 @@ class ProcesoPreparacionController
 
     public function mantenimiento()
     {
+        Auth::requerir(['Administrador', 'Cocina']);
         $procesos = $this->model->getAllMantenimiento();
         $this->response->status(200)->toJSON($procesos ?? []);
     }
@@ -56,6 +57,7 @@ class ProcesoPreparacionController
 
     private function cambiarEstado($activo)
     {
+        Auth::requerir(['Administrador', 'Cocina']);
         $data = $this->request->getJSON();
         $id = intval($data->id_proceso ?? 0);
         if ($id <= 0) {
@@ -68,6 +70,7 @@ class ProcesoPreparacionController
 
     public function create()
     {
+        Auth::requerir(['Administrador', 'Cocina']);
         $data = $this->parsePayload();
         $errores = $this->validar($data);
         if (!empty($errores)) {
@@ -94,6 +97,7 @@ class ProcesoPreparacionController
 
     public function update()
     {
+        Auth::requerir(['Administrador', 'Cocina']);
         $data = $this->parsePayload();
         $id = intval($data['id_proceso'] ?? 0);
         if ($id <= 0) {

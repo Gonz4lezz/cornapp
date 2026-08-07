@@ -35,6 +35,7 @@ class ComboController
 
     public function mantenimiento()
     {
+        Auth::requerir(['Administrador']);
         $combos = $this->model->getAllMantenimiento();
         $this->response->status(200)->toJSON($combos ?? []);
     }
@@ -51,6 +52,7 @@ class ComboController
 
     private function cambiarEstado($activo)
     {
+        Auth::requerir(['Administrador']);
         $data = $this->request->getJSON();
         $id = intval($data->id_combo ?? 0);
         if ($id <= 0) {
@@ -63,6 +65,7 @@ class ComboController
 
     public function create()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $errores = $this->validar($data);
         if (!empty($errores)) {
@@ -91,6 +94,7 @@ class ComboController
 
     public function update()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $id = intval($data['id_combo'] ?? 0);
         if ($id <= 0) {

@@ -13,8 +13,7 @@ class RoutesController
     }
 
     private function registerRoutes() {
-        // Rutas protegidas: Metodo, path (minúscula), controlador, accion, roles permitidos
-        // $this->addProtectedRoute('POST', '/cornapp/productocontroller/create', 'ProductoController', 'create', ['Administrador']);
+
     }
 
     public function routes() {
@@ -61,7 +60,9 @@ class RoutesController
                 exit();
             }
 
-            $routesArray = explode("/", $_SERVER['REQUEST_URI']);
+            // Solo la ruta: se descarta el query string (?fecha=...&estado=...)
+            $rutaSinQuery = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $routesArray = explode("/", $rutaSinQuery);
             $routesArray = array_filter($routesArray);
 
             if (count($routesArray) < 2) {

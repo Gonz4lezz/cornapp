@@ -42,9 +42,9 @@ class MySqlConnect {
 	public function executeSQL($sql,$resultType="obj") {
 		$lista = NULL;
 		try {
-			$this->connect();	
+			$this->connect();
 			if ($result = $this->link->query ( $sql )) {
-				for($num_fila = $result->num_rows - 1; $num_fila >= 0; $num_fila --) {
+				for($num_fila = 0; $num_fila < $result->num_rows; $num_fila ++) {
 					$result->data_seek ( $num_fila );
 					switch ($resultType){
 						case "obj":
@@ -90,8 +90,6 @@ class MySqlConnect {
 			$this->link->close ();
 			return $num_results;
 		} catch ( Exception $e ) {
-			/* $this->log->error("File: ".$e->getFile()." - line: ".$e->getLine()." - Code: ".$e->getCode()." - Message: ".$e->getMessage());
-			throw new \Exception('Error: ' . $e->getMessage()); */
 			handleException($e);
 		}
 	}

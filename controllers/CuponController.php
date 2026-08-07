@@ -23,6 +23,7 @@ class CuponController
     // GET /CuponController/mantenimiento -> todos los cupones (admin)
     public function mantenimiento()
     {
+        Auth::requerir(['Administrador']);
         $cupones = $this->model->getAllMantenimiento();
         $this->response->status(200)->toJSON($cupones ?? []);
     }
@@ -39,6 +40,7 @@ class CuponController
 
     private function cambiarEstado($activo)
     {
+        Auth::requerir(['Administrador']);
         $data = $this->request->getJSON();
         $id = intval($data->id_cupon ?? 0);
         if ($id <= 0) {
@@ -76,6 +78,7 @@ class CuponController
 
     public function create()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $errores = $this->validar($data);
         if (!empty($errores)) {
@@ -100,6 +103,7 @@ class CuponController
 
     public function update()
     {
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $id = intval($data['id_cupon'] ?? 0);
         if ($id <= 0) {
