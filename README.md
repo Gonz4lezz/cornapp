@@ -6,3 +6,22 @@
 
  Link de github del proyecto: 
  https://github.com/Gonz4lezz/cornapp
+
+## LISTA PARA INICIO DE SESION CON LOS DISTINTOS ROLES:
+
+ -- ADMINISTRADOR: 
+    - Usuario: admin@cornapp.com
+    - Contraseña: Admin123 
+
+ -- ENCARGADO:
+    - Usuario: encargado@cornapp.com
+    - Contraseña: Encargado123
+
+ -- COCINA: 
+    - Usuario: cocina@cornapp.com
+    - Contraseña: Cocina123
+
+ -- CLIENTE:
+    - Usuario: cliente@cornapp.com
+    - Contraseña: Cliente123
+    
