@@ -1,0 +1,129 @@
+.pedidos-page {
+  min-height: 60vh;
+}
+
+.pedidos-filtros {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.pedidos-filtro-estado {
+  min-width: 210px;
+}
+
+.pedidos-limpiar {
+  border: none;
+  background: transparent;
+  color: var(--secondary-dark);
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.pedidos-limpiar:hover {
+  background: rgba(255, 142, 66, 0.12);
+}
+
+.pedidos-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 60px 0;
+  color: var(--text-light);
+}
+
+.pedidos-vacio span {
+  font-size: 2.4rem;
+}
+
+.pedidos-tabla-contenedor {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+
+.pedidos-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.pedidos-tabla th {
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--bg-light);
+  color: var(--text-light);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.pedidos-tabla td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.pedidos-numero {
+  font-weight: 600;
+  color: var(--tertiary);
+}
+
+.pedidos-total {
+  font-weight: 600;
+}
+
+.pedidos-ver {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Chips de estado con colores según el ciclo de vida del pedido */
+.pedido-estado {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  white-space: nowrap;
+}
+
+.pedido-estado-registrado {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.pedido-estado-aceptado {
+  background: #fdf4ff;
+  color: #a21caf;
+  border: 1px solid #f0abfc;
+}
+
+.pedido-estado-en-preparacion {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+.pedido-estado-listo {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #6ee7b7;
+}
+
+.pedido-estado-entregado {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
