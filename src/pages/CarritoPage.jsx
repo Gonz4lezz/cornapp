@@ -175,7 +175,7 @@ function CarritoPage() {
           : numeroOpcional(),
         tipo_entrega: yup
           .string()
-          .oneOf(['Retiro en local', 'domicilio'])
+          .oneOf(['recogida', 'domicilio'])
           .required('Seleccione el método de entrega'),
         id_tarifa: numeroOpcional().when('tipo_entrega', {
           is: 'domicilio',

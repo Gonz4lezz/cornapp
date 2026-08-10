@@ -74,7 +74,6 @@ function ProductoDetalle() {
           <div className="detalle-info">
             <div className="detalle-precio">
               {formatoMoneda(producto.precio_base)}
-              <span className="detalle-precio-iva">IVA incluido</span>
             </div>
 
             <CuponBanner cupon={cupon} precioBase={producto.precio_base} />
