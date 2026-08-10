@@ -86,6 +86,9 @@ class PedidoController
 
         // --- Carrito (los precios y descuentos se recalculan en el servidor) ---
         $items = $this->carritoModel->getItems($usuario->id_usuario);
+        if (!is_iterable($items)) {
+            $items = [];
+        }
         if (empty($items)) {
             $this->response->status(422)->toJSON(null, 'El carrito está vacío');
             return;
@@ -123,19 +126,19 @@ class PedidoController
             ];
         }
 
-        // --- Cálculo de líneas, descuentos e impuestos (13% por línea) ---
         $lineas = [];
-        $subtotal = 0.0;
+        $netoTotal = 0.0;     
         $descuentoTotal = 0.0;
         $impuestoTotal = 0.0;
-        foreach ((array)$items as $item) {
+        foreach ($items as $item) {
             $precioUnitario = floatval($item->precio_unitario);
             $cantidad = intval($item->cantidad);
             $precioTotal = round($precioUnitario * $cantidad, 2);
             $descuento = $this->descuentoDeLinea($item, $cupones, $precioTotal);
-            $impuestoLinea = round(($precioTotal - $descuento) * PedidoModel::TASA_IMPUESTO, 2);
+            $netoLinea = round($precioTotal - $descuento, 2);
+            $impuestoLinea = PedidoModel::impuestoIncluido($netoLinea);
 
-            $subtotal += $precioTotal;
+            $netoTotal += $netoLinea;
             $descuentoTotal += $descuento;
             $impuestoTotal += $impuestoLinea;
 
@@ -149,13 +152,19 @@ class PedidoController
                 'observaciones' => $item->observaciones,
             ];
         }
-        $total = round($subtotal - $descuentoTotal + $impuestoTotal + $costoEnvio, 2);
+        // Base gravable: lo cobrado menos el IVA que ya venía incluido
+        $subtotal = round($netoTotal - $impuestoTotal, 2);
+        $total = round($netoTotal + $costoEnvio, 2);
 
         // --- Pago simulado (tarjetas o efectivo) ---
         $metodos = $this->model->getMetodosPago();
+        if (!is_array($metodos) && !($metodos instanceof \Traversable)) {
+            $metodos = [];
+        }
+
         $idMetodo = intval($data->id_metodo ?? 0);
         $metodo = null;
-        foreach ((array)$metodos as $m) {
+        foreach ($metodos as $m) {
             if (intval($m->id_metodo) === $idMetodo) {
                 $metodo = $m;
             }
@@ -211,7 +220,7 @@ class PedidoController
                 'monto_total' => $total,
             ],
             $lineas,
-            is_array($cupones) ? array_map(fn($c) => $c->id_cupon, $cupones) : [],
+            array_map(fn($c) => $c->id_cupon, (array)$cupones),
             $pago,
             $envio
         );

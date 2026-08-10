@@ -223,7 +223,7 @@ function PedidoDetallePage() {
           {/* ---------- Totales ---------- */}
           <div className="pedido-totales">
             <div className="resumen-fila">
-              <span>Subtotal (sin impuestos)</span>
+              <span>Subtotal (impuestos incluidos)</span>
               <span>{formatoMoneda(pedido.subtotal)}</span>
             </div>
             {Number(pedido.monto_descuento) > 0 && (
@@ -244,8 +244,7 @@ function PedidoDetallePage() {
             )}
             <div className="resumen-fila resumen-total">
               <span>
-                Total (con impuestos
-                {Number(pedido.costo_envio) > 0 ? ' y envío' : ''})
+                Total
               </span>
               <span>{formatoMoneda(pedido.monto_total)}</span>
             </div>

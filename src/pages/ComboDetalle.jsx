@@ -68,6 +68,7 @@ function ComboDetalle() {
           <div className="detalle-info">
             <div className="detalle-precio">
               {formatoMoneda(combo.precio_combo)}
+              <span className="detalle-precio-iva">IVA incluido</span>
             </div>
 
             <CuponBanner cupon={cupon} precioBase={combo.precio_combo} />

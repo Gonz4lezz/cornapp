@@ -506,23 +506,25 @@ INSERT INTO cupon (codigo, nombre, descripcion, tipo_descuento, valor_descuento,
 -- 5 pedidos con variedad de estados, fechas, métodos de pago y
 -- entrega, para probar historial, filtros, detalle y cocina.
 -- Las fechas son relativas a NOW() para que siempre haya datos
--- recientes al reimportar. IVA: 13%.
+-- recientes al reimportar. Los precios ya incluyen el IVA del 13%:
+-- subtotal = base gravable, monto_impuesto = IVA desglosado y
+-- monto_total = subtotal + IVA + envío.
 -- ============================================================
 
 -- ------------------------------------------------------------
 -- Pedido 1 (PED-2026-0001) — Carlos, recogida, tarjeta de crédito, ENTREGADO (hace 9 días)
 -- 2x Corn Dog Clásico (₡2500) + 1x Limonada Natural (₡1200)
--- Subtotal 6200, IVA 806.00, total 7006.00
+-- Los precios ya incluyen IVA: cobrado 6200, IVA desglosado 713.27, base 5486.73
 -- ------------------------------------------------------------
 INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
-    (1, NULL, 5, 'PED-2026-0001', 'recogida', 6200.00, 0.1300, 806.00, 0.00, 0.00, 7006.00, DATE_SUB(NOW(), INTERVAL 9 DAY));
+    (1, NULL, 5, 'PED-2026-0001', 'recogida', 5486.73, 0.1300, 713.27, 0.00, 0.00, 6200.00, DATE_SUB(NOW(), INTERVAL 9 DAY));
 
 INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
     (1, 1,  NULL, 2, 2500.00, 5000.00, 0.00, 'Con bastante ketchup y mostaza'),      -- detalle 1
     (1, 14, NULL, 1, 1200.00, 1200.00, 0.00, NULL);                                   -- detalle 2
 
 INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, ultimos_cuatro, titular_tarjeta, vencimiento_tarjeta, procesado_en) VALUES
-    (1, 1, 7006.00, 'completado', 'TXN-SIM-0001', '4242', 'Carlos Jiménez Vargas', '08/2027', DATE_SUB(NOW(), INTERVAL 9 DAY));
+    (1, 1, 6200.00, 'completado', 'TXN-SIM-0001', '4242', 'Carlos Jiménez Vargas', '08/2027', DATE_SUB(NOW(), INTERVAL 9 DAY));
 
 INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, comentario, cambiado_en) VALUES
     (1, 1, 1,    'Pedido registrado y pagado por el cliente',    DATE_SUB(NOW(), INTERVAL '9 0:00' DAY_MINUTE)),
@@ -541,18 +543,18 @@ INSERT INTO item_orden_cocina (id_orden_cocina, id_detalle, id_producto, cantida
 -- ------------------------------------------------------------
 -- Pedido 2 (PED-2026-0002) — María, A DOMICILIO, efectivo, ENTREGADO (hace 5 días)
 -- 1x Combo Familiar (₡9000) + 2x Gaseosa (₡900)
--- Subtotal 10800, IVA 1404.00, envío 800 (Zona media), total 13004.00
--- Efectivo: recibió 15000, vuelto 1996.00
+-- Cobrado 10800 (IVA incluido 1242.48, base 9557.52) + envío 800 (Zona media)
+-- Total 11600.00 — efectivo: recibió 15000, vuelto 3400.00
 -- ------------------------------------------------------------
 INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
-    (2, NULL, 5, 'PED-2026-0002', 'domicilio', 10800.00, 0.1300, 1404.00, 800.00, 0.00, 13004.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
+    (2, NULL, 5, 'PED-2026-0002', 'domicilio', 9557.52, 0.1300, 1242.48, 800.00, 0.00, 11600.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
 INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
     (2, NULL, 3, 1, 9000.00, 9000.00, 0.00, 'Los corn dogs bien dorados por favor'),  -- detalle 3
     (2, 16, NULL, 2, 900.00, 1800.00, 0.00, NULL);                                    -- detalle 4
 
 INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, efectivo_recibido, vuelto, procesado_en) VALUES
-    (2, 3, 13004.00, 'completado', 'TXN-SIM-0002', 15000.00, 1996.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
+    (2, 3, 11600.00, 'completado', 'TXN-SIM-0002', 15000.00, 3400.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
 INSERT INTO envio (id_pedido, id_tarifa, costo_envio, direccion_texto, referencia, nombre_receptor, telefono_receptor) VALUES
     (2, 2, 800.00, 'Alajuela centro, del parque Juan Santamaría 200 m norte y 50 m este, casa blanca de dos plantas', 'Portón negro, timbre a la derecha', 'María Rodríguez Soto', '8888-2222');
@@ -578,10 +580,10 @@ INSERT INTO item_orden_cocina (id_orden_cocina, id_detalle, id_producto, cantida
 -- Pedido 3 (PED-2026-0003) — Carlos, recogida, tarjeta de débito, LISTO (ayer)
 -- CON CUPÓN: CLASICO15 (15% en Corn Dog Clásico)
 -- 1x Corn Dog Clásico (₡2500, desc. 375) + 1x Corn Dog de Chocolate (₡3500)
--- Subtotal 6000, descuento 375, IVA sobre 5625 = 731.25, total 6356.25
+-- Cobrado 5625 (6000 menos el descuento): IVA incluido 647.12, base 4977.88
 -- ------------------------------------------------------------
 INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
-    (1, NULL, 4, 'PED-2026-0003', 'recogida', 6000.00, 0.1300, 731.25, 0.00, 375.00, 6356.25, DATE_SUB(NOW(), INTERVAL 1 DAY));
+    (1, NULL, 4, 'PED-2026-0003', 'recogida', 4977.88, 0.1300, 647.12, 0.00, 375.00, 5625.00, DATE_SUB(NOW(), INTERVAL 1 DAY));
 
 INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
     (3, 1, NULL, 1, 2500.00, 2500.00, 375.00, NULL),                                  -- detalle 5 (cupón CLASICO15)
@@ -591,7 +593,7 @@ INSERT INTO pedido_cupon (id_pedido, id_cupon) VALUES (3, 1);
 UPDATE cupon SET cantidad_usos = cantidad_usos + 1 WHERE id_cupon = 1;
 
 INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, ultimos_cuatro, titular_tarjeta, vencimiento_tarjeta, procesado_en) VALUES
-    (3, 2, 6356.25, 'completado', 'TXN-SIM-0003', '1881', 'Carlos Jiménez Vargas', '03/2028', DATE_SUB(NOW(), INTERVAL 1 DAY));
+    (3, 2, 5625.00, 'completado', 'TXN-SIM-0003', '1881', 'Carlos Jiménez Vargas', '03/2028', DATE_SUB(NOW(), INTERVAL 1 DAY));
 
 INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, comentario, cambiado_en) VALUES
     (3, 1, 1, 'Pedido registrado y pagado por el cliente', DATE_SUB(NOW(), INTERVAL '1 0:00' DAY_MINUTE)),
@@ -611,17 +613,17 @@ INSERT INTO item_orden_cocina (id_orden_cocina, id_detalle, id_producto, cantida
 -- efectivo, EN PREPARACIÓN (hace 2 horas): así el tablero de cocina
 -- siempre tiene trabajo pendiente al reimportar.
 -- 2x Corn Dog de Queso (₡3000) + 1x Combo Snack (₡2500)
--- Subtotal 8500, IVA 1105.00, total 9605.00 — efectivo: 10000, vuelto 395
+-- Cobrado 8500 (IVA incluido 977.88, base 7522.12) — efectivo: 10000, vuelto 1500
 -- ------------------------------------------------------------
 INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
-    (2, 3, 3, 'PED-2026-0004', 'recogida', 8500.00, 0.1300, 1105.00, 0.00, 0.00, 9605.00, DATE_SUB(NOW(), INTERVAL 2 HOUR));
+    (2, 3, 3, 'PED-2026-0004', 'recogida', 7522.12, 0.1300, 977.88, 0.00, 0.00, 8500.00, DATE_SUB(NOW(), INTERVAL 2 HOUR));
 
 INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
     (4, 2, NULL, 2, 3000.00, 6000.00, 0.00, 'Sin azúcar espolvoreada'),               -- detalle 7
     (4, NULL, 4, 1, 2500.00, 2500.00, 0.00, NULL);                                    -- detalle 8
 
 INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, efectivo_recibido, vuelto, procesado_en) VALUES
-    (4, 3, 9605.00, 'completado', 'TXN-SIM-0004', 10000.00, 395.00, DATE_SUB(NOW(), INTERVAL 2 HOUR));
+    (4, 3, 8500.00, 'completado', 'TXN-SIM-0004', 10000.00, 1500.00, DATE_SUB(NOW(), INTERVAL 2 HOUR));
 
 INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, comentario, cambiado_en) VALUES
     (4, 1, 3, 'Pedido registrado en mostrador por la encargada', DATE_SUB(NOW(), INTERVAL 120 MINUTE)),
@@ -642,17 +644,17 @@ INSERT INTO item_orden_cocina (id_orden_cocina, id_detalle, id_producto, cantida
 -- REGISTRADO (hace 15 minutos): para demostrar en vivo la aceptación
 -- del encargado y el flujo completo hacia cocina.
 -- 1x Corn Dog Mixto (₡3200) + 1x Papas Fritas Clásicas (₡1500)
--- Subtotal 4700, IVA 611.00, total 5311.00
+-- Cobrado 4700 (IVA incluido 540.71, base 4159.29)
 -- ------------------------------------------------------------
 INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
-    (1, NULL, 1, 'PED-2026-0005', 'recogida', 4700.00, 0.1300, 611.00, 0.00, 0.00, 5311.00, DATE_SUB(NOW(), INTERVAL 15 MINUTE));
+    (1, NULL, 1, 'PED-2026-0005', 'recogida', 4159.29, 0.1300, 540.71, 0.00, 0.00, 4700.00, DATE_SUB(NOW(), INTERVAL 15 MINUTE));
 
 INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
     (5, 3, NULL, 1, 3200.00, 3200.00, 0.00, 'Extra ketchup'),                         -- detalle 9
     (5, 7, NULL, 1, 1500.00, 1500.00, 0.00, NULL);                                    -- detalle 10
 
 INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, ultimos_cuatro, titular_tarjeta, vencimiento_tarjeta, procesado_en) VALUES
-    (5, 1, 5311.00, 'completado', 'TXN-SIM-0005', '4242', 'Carlos Jiménez Vargas', '08/2027', DATE_SUB(NOW(), INTERVAL 15 MINUTE));
+    (5, 1, 4700.00, 'completado', 'TXN-SIM-0005', '4242', 'Carlos Jiménez Vargas', '08/2027', DATE_SUB(NOW(), INTERVAL 15 MINUTE));
 
 INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, comentario, cambiado_en) VALUES
     (5, 1, 1, 'Pedido registrado y pagado por el cliente', DATE_SUB(NOW(), INTERVAL 15 MINUTE));

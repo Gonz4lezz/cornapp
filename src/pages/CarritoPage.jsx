@@ -474,7 +474,7 @@ function CarritoPage() {
 
               <div className="factura-campo">
                 <span className="factura-etiqueta">Estado</span>
-                <span className="factura-estado">Registrado</span>
+                <span className="factura-estado">Pendiente de confirmar</span>
               </div>
 
               {!esPersonal ? (
@@ -534,7 +534,7 @@ function CarritoPage() {
                       {usuario.nombre} {usuario.apellido}
                     </span>
                     <span className="factura-subvalor">
-                      Sesión activa (no editable)
+                      Sesión actual
                     </span>
                   </div>
                 </>

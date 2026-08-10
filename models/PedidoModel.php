@@ -2,7 +2,18 @@
 
 class PedidoModel
 {
+    // Los precios del catálogo ya incluyen el IVA, por lo que el impuesto no se
+    // suma: se desglosa del precio con la fórmula monto * tasa / (1 + tasa).
     const TASA_IMPUESTO = 0.13;
+
+    // Desglosa el IVA contenido en un monto que ya lo incluye
+    public static function impuestoIncluido($montoConImpuesto)
+    {
+        return round(
+            floatval($montoConImpuesto) * self::TASA_IMPUESTO / (1 + self::TASA_IMPUESTO),
+            2
+        );
+    }
 
     private $db;
 
@@ -10,6 +21,10 @@ class PedidoModel
     {
         $this->db = new MySqlConnect();
     }
+
+    // ------------------------------------------------------------------
+    // Catálogos
+    // ------------------------------------------------------------------
 
     public function getEstados()
     {
@@ -43,6 +58,15 @@ class PedidoModel
         return (is_array($result) && count($result) > 0) ? $result[0] : null;
     }
 
+    // ------------------------------------------------------------------
+    // Creación del pedido (a partir del carrito ya validado)
+    // ------------------------------------------------------------------
+
+    /**
+     * Inserta el pedido completo: encabezado, detalles, cupones, pago,
+     * envío (si aplica) y primer seguimiento. Devuelve el id del pedido.
+     * $lineas: [{id_producto|id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones}]
+     */
     public function crear($encabezado, $lineas, $idsCupones, $pago, $envio)
     {
         // Número de pedido consecutivo del año
@@ -100,7 +124,7 @@ class PedidoModel
 
         // Pago simulado: queda registrado como completado
         $idMetodo = intval($pago['id_metodo']);
-        $transaccion = 'TXN-SIM-' . str_pad(strval($idPedido), 4, '0', STR_PAD_LEFT);
+        $transaccion = 'TXN-SIM-' . str_pad((string) $idPedido, 4, '0', STR_PAD_LEFT);
         $ultimos = $pago['ultimos_cuatro'] ? "'" . $this->db_escape($pago['ultimos_cuatro']) . "'" : 'NULL';
         $titular = $pago['titular_tarjeta'] ? "'" . $this->db_escape($pago['titular_tarjeta']) . "'" : 'NULL';
         $vencimiento = $pago['vencimiento_tarjeta'] ? "'" . $this->db_escape($pago['vencimiento_tarjeta']) . "'" : 'NULL';
@@ -220,7 +244,7 @@ class PedidoModel
                     d.precio_unitario, d.precio_total, d.monto_descuento, d.observaciones,
                     COALESCE(pr.nombre, co.nombre) AS nombre,
                     CASE WHEN d.id_producto IS NOT NULL THEN 'producto' ELSE 'combo' END AS tipo,
-                    ROUND((d.precio_total - d.monto_descuento) * p.tasa_impuesto, 2) AS monto_impuesto
+                    ROUND((d.precio_total - d.monto_descuento) * p.tasa_impuesto / (1 + p.tasa_impuesto), 2) AS monto_impuesto
              FROM detalle_pedido d
              INNER JOIN pedido p ON d.id_pedido = p.id_pedido
              LEFT JOIN producto pr ON d.id_producto = pr.id_producto
