@@ -7,12 +7,11 @@
 }
 
 .navbar-container {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-evenly;
   height: 64px;
 }
 
@@ -32,6 +31,8 @@
 
 .logo-icon {
   font-size: 1.6rem;
+  width: 66px;
+  display: flex;
 }
 
 .navbar-right {
@@ -43,6 +44,122 @@
 .navbar-translate {
   display: flex;
   align-items: center;
+}
+
+.navbar-carrito {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.navbar-carrito:hover {
+  background: rgba(255, 142, 66, 0.15);
+  
+}
+
+.navbar-carrito.active {
+  background: var(--secondary);
+  color: #fff;
+}
+
+.navbar-carrito-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--secondary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--tertiary);
+}
+
+.navbar-carrito.active .navbar-carrito-badge {
+  background: #fff;
+  color: var(--secondary-dark);
+  border-color: var(--secondary);
+}
+
+/* Chip del usuario logueado */
+.navbar-usuario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 4px 12px 4px 4px;
+  cursor: pointer;
+  color: var(--text-on-dark);
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.navbar-usuario:hover {
+  background: rgba(255, 142, 66, 0.2);
+}
+
+.navbar-usuario-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.navbar-menu-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.navbar-menu-info span {
+  color: var(--text-light);
+  font-size: 0.8rem;
+}
+
+.navbar-menu-rol {
+  color: var(--secondary-dark) !important;
+  font-weight: 600;
+}
+
+.navbar-login {
+  background: var(--secondary);
+  color: var(--text-on-dark);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.navbar-login:hover {
+  background: var(--secondary-dark);
+  color: var(--text-on-dark);
 }
 
 .navbar-links {
@@ -157,6 +274,9 @@
 .footer-integrantes li {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .footer-integrantes li {
