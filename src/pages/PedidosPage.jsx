@@ -85,6 +85,7 @@ function PedidosPage() {
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
               className="pedidos-filtro-estado"
+              style={{ minWidth: '200px' }}
             >
               <MenuItem value="">Todos los estados</MenuItem>
               {estados.map((estado) => (

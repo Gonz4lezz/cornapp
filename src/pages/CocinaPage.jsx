@@ -120,6 +120,7 @@ function CocinaPage() {
             value={filtroEstacion}
             onChange={(e) => setFiltroEstacion(e.target.value)}
             className="cocina-filtro"
+            style={{ minWidth: '200px' }}
           >
             <MenuItem value="">Todas las estaciones</MenuItem>
             {estaciones.map((estacion) => (

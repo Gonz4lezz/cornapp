@@ -129,7 +129,7 @@ function PedidoDetallePage() {
               <span className="factura-valor">
                 {pedido.nombre_encargado
                   ? `${pedido.nombre_encargado} ${pedido.apellido_encargado}`
-                  : 'Pedido en línea (autogestionado)'}
+                  : 'Pedido en línea'}
               </span>
             </div>
             <div className="factura-campo">
@@ -223,7 +223,7 @@ function PedidoDetallePage() {
           {/* ---------- Totales ---------- */}
           <div className="pedido-totales">
             <div className="resumen-fila">
-              <span>Subtotal (impuestos incluidos)</span>
+              <span>Subtotal</span>
               <span>{formatoMoneda(pedido.subtotal)}</span>
             </div>
             {Number(pedido.monto_descuento) > 0 && (
