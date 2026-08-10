@@ -1,0 +1,244 @@
+.cocina-page {
+  min-height: 60vh;
+}
+
+.cocina-controles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.cocina-filtro {
+  min-width: 230px;
+}
+
+.cocina-leyenda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.leyenda-item {
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.leyenda-pendiente {
+  border-color: #cbd5e1;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.leyenda-proceso {
+  border-color: #fcd34d;
+  color: #b45309;
+  background: #fffbeb;
+}
+
+.leyenda-completado {
+  border-color: #6ee7b7;
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.cocina-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 70px 0;
+  text-align: center;
+}
+
+.cocina-vacio span {
+  font-size: 3rem;
+}
+
+.cocina-vacio p {
+  color: var(--text-light);
+}
+
+/* ---------- Tablero ---------- */
+.cocina-tablero {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.cocina-pedido {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.cocina-pedido-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--tertiary);
+  color: var(--text-on-dark);
+}
+
+.cocina-pedido-cabecera strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--secondary);
+}
+
+.cocina-pedido-cabecera span {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cocina-pedido-entrega {
+  font-size: 0.82rem !important;
+  color: #fff !important;
+}
+
+.cocina-items {
+  list-style: none;
+  margin: 0;
+  padding: 10px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Control visual por colores según el estado del item */
+.cocina-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+}
+
+.cocina-item-pendiente {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.cocina-item-en_proceso {
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.cocina-item-completado {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  opacity: 0.85;
+}
+
+.cocina-item-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cocina-item-cantidad {
+  background: var(--tertiary);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.cocina-item-nombre {
+  display: block;
+  font-weight: 600;
+  color: var(--tertiary);
+  font-size: 0.92rem;
+}
+
+.cocina-item-combo {
+  display: block;
+  font-size: 0.72rem;
+  color: #7e22ce;
+  font-weight: 600;
+}
+
+.cocina-item-obs {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.cocina-item-derecha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.cocina-item-estacion {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1.5px solid;
+  border-radius: 10px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cocina-item-estacion small {
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+.cocina-item-sin-proceso {
+  border-color: var(--border);
+  color: var(--text-light);
+}
+
+.cocina-item-boton {
+  background: var(--secondary);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.cocina-item-boton:hover {
+  background: var(--secondary-dark);
+}
+
+.cocina-item-listo {
+  color: #047857;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 520px) {
+  .cocina-tablero {
+    grid-template-columns: 1fr;
+  }
+
+  .cocina-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,13 +1,35 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import toast from 'react-hot-toast';
 import { resolveImageUrl } from '../services/api';
 import { precioConDescuento, formatoMoneda } from '../utils/format';
+import { useAuth } from '../context/AuthContext';
+import { useCarrito } from '../context/CarritoContext';
 import './CuponCard.css';
-import LocalActivityIcon from '@mui/icons-material/LocalActivity';
 
-// Card de un cupón. Al hacer clic lleva al producto o combo asociado.
+// Card de un cupón. Al hacer clic lleva al producto o combo asociado,
+// y con el botón "Usar" se aplica directamente en el carrito.
 function CuponCard({ cupon }) {
+  const navigate = useNavigate();
+  const { usuario, puedeComprar } = useAuth();
+  const { usarCupon } = useCarrito();
+  const [usando, setUsando] = useState(false);
   const esProducto = cupon.id_producto != null;
+
+  const alUsar = async (evento) => {
+    evento.preventDefault();
+    evento.stopPropagation();
+    if (!usuario) {
+      toast('Inicia sesión para usar los cupones', { icon: '🔒' });
+      navigate('/login');
+      return;
+    }
+    if (!puedeComprar) return;
+    setUsando(true);
+    await usarCupon(cupon);
+    setUsando(false);
+  };
   const destino = esProducto
     ? `/productos/${cupon.id_producto}`
     : `/combos/${cupon.id_combo}`;
@@ -34,7 +56,7 @@ function CuponCard({ cupon }) {
         {cupon.imagen ? (
           <img src={resolveImageUrl(cupon.imagen)} alt={nombreItem} />
         ) : (
-          <div className="cupon-card-img-placeholder"><LocalActivityIcon fontSize="large" /></div>
+          <div className="cupon-card-img-placeholder">🎟️</div>
         )}
       </div>
 
@@ -62,6 +84,17 @@ function CuponCard({ cupon }) {
             Ver {esProducto ? 'producto' : 'combo'} &rarr;
           </span>
         </div>
+
+        {(!usuario || puedeComprar) && (
+          <button
+            type="button"
+            className="cupon-card-usar"
+            onClick={alUsar}
+            disabled={usando}
+          >
+            {usando ? 'Aplicando…' : 'Usar cupón'}
+          </button>
+        )}
       </div>
     </Link>
   );

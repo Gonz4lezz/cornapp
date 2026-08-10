@@ -20,6 +20,21 @@ export const formatoFecha = (valor) => {
   }).format(fecha);
 };
 
+// Fecha y hora completas (para timestamps tipo "2026-08-06 14:30:00")
+export const formatoFechaHora = (valor) => {
+  if (!valor) return '';
+  const fecha = new Date(String(valor).replace(' ', 'T'));
+  if (isNaN(fecha.getTime())) return valor;
+  return new Intl.DateTimeFormat('es-CR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(fecha);
+};
+
 export const formatoHora = (valor) => {
   if (!valor) return '';
   const partes = valor.split(':');

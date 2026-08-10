@@ -145,3 +145,27 @@
   color: var(--secondary);
   font-weight: 600;
 }
+
+.cupon-card-usar {
+  margin-top: 12px;
+  width: 100%;
+  background: var(--secondary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cupon-card-usar:hover {
+  background: var(--secondary-dark);
+}
+
+.cupon-card-usar:disabled {
+  opacity: 0.7;
+  cursor: default;
+}

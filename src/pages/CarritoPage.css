@@ -1,0 +1,461 @@
+.carrito-page {
+  min-height: 60vh;
+}
+
+.carrito-vacio {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.carrito-vacio-icono {
+  font-size: 3rem;
+}
+
+.carrito-vacio p {
+  color: var(--text-light);
+}
+
+.carrito-vacio-boton {
+  margin-top: 12px;
+  background: var(--secondary);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.carrito-vacio-boton:hover {
+  background: var(--secondary-dark);
+  color: #fff;
+}
+
+.carrito-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ---------- Factura ---------- */
+.carrito-factura {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.factura-encabezado {
+  padding: 22px 24px;
+  border-bottom: 2px dashed var(--border);
+}
+
+.factura-titulo {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  color: var(--secondary-dark);
+}
+
+.factura-encabezado-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 24px;
+}
+
+.factura-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.factura-etiqueta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-light);
+}
+
+.factura-valor {
+  font-weight: 600;
+  color: var(--tertiary);
+}
+
+.factura-subvalor {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.factura-estado {
+  align-self: flex-start;
+  background: #fff4e8;
+  color: var(--secondary-dark);
+  border: 1px solid var(--secondary-light);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 12px;
+}
+
+.factura-cliente-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: var(--bg-light);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
+.factura-campo-entrega .MuiFormControlLabel-label {
+  font-size: 0.88rem;
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.factura-domicilio {
+  display: grid;
+  grid-template-columns: 220px 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+/* ---------- Tabla de detalle ---------- */
+.factura-detalle {
+  overflow-x: auto;
+}
+
+.factura-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.factura-tabla th {
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--bg-light);
+  color: var(--text-light);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.factura-tabla td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.factura-articulo {
+  min-width: 240px;
+}
+
+.factura-articulo-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.factura-articulo-info img {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.factura-articulo-placeholder {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-light);
+  border-radius: 8px;
+  font-size: 1.3rem;
+}
+
+.factura-articulo-nombre {
+  display: block;
+  font-weight: 600;
+  color: var(--tertiary);
+}
+
+.factura-articulo-tipo {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 1px 8px;
+  margin-top: 2px;
+}
+
+.tipo-producto {
+  background: #eef6ff;
+  color: #1d4ed8;
+}
+
+.tipo-combo {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.factura-observaciones {
+  margin-top: 8px;
+  width: 100%;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: transparent;
+}
+
+.factura-observaciones:focus {
+  outline: none;
+  border-color: var(--secondary);
+  border-style: solid;
+}
+
+.factura-cantidad {
+  width: 64px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 6px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.9rem;
+}
+
+.factura-cantidad:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(255, 142, 66, 0.2);
+}
+
+.factura-descuento {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.factura-borrar {
+  border: none;
+  background: transparent;
+  font-size: 1.05rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.factura-borrar:hover {
+  background: #fee2e2;
+}
+
+/* ---------- Cupones ---------- */
+.factura-cupones {
+  padding: 18px 24px 24px;
+  border-top: 2px dashed var(--border);
+}
+
+.factura-cupon-input {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  max-width: 380px;
+}
+
+.factura-cupon-input input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.factura-cupon-input input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(255, 142, 66, 0.2);
+}
+
+.factura-cupon-input button {
+  background: var(--tertiary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 18px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.factura-cupon-input button:hover {
+  background: var(--secondary-dark);
+}
+
+.factura-cupones-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.factura-cupon-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #047857;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
+.factura-cupon-chip small {
+  font-weight: 400;
+  color: #059669;
+}
+
+.factura-cupon-chip button {
+  border: none;
+  background: transparent;
+  color: #047857;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+/* ---------- Resumen y pago ---------- */
+.carrito-resumen {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  position: sticky;
+  top: 84px;
+}
+
+.carrito-resumen h3 {
+  margin-bottom: 14px;
+  font-size: 1.05rem;
+}
+
+.resumen-fila {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.resumen-descuento {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.resumen-total {
+  border-top: 2px solid var(--border);
+  margin-top: 8px;
+  padding-top: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--tertiary);
+}
+
+.resumen-usd {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.resumen-usd small {
+  display: block;
+  font-size: 0.72rem;
+}
+
+.resumen-pago {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.resumen-pago h4 {
+  font-size: 0.92rem;
+}
+
+.resumen-tarjeta,
+.resumen-efectivo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.resumen-tarjeta-fila {
+  display: flex;
+  gap: 12px;
+}
+
+.resumen-nota {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.resumen-vuelto {
+  font-size: 0.9rem;
+  background: #ecfdf5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #047857;
+}
+
+.resumen-vuelto-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.resumen-confirmar.MuiButton-root {
+  margin-top: 18px;
+  background: var(--secondary);
+  border-radius: 10px;
+  text-transform: none;
+  font-weight: 600;
+  font-family: 'Poppins', system-ui, sans-serif;
+  padding: 11px 0;
+}
+
+.resumen-confirmar.MuiButton-root:hover {
+  background: var(--secondary-dark);
+}
+
+@media (max-width: 960px) {
+  .carrito-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .carrito-resumen {
+    position: static;
+  }
+
+  .factura-domicilio {
+    grid-template-columns: 1fr;
+  }
+}

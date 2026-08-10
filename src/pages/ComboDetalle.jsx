@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { comboService, cuponService, resolveImageUrl } from '../services/api';
 import { formatoMoneda } from '../utils/format';
 import CuponBanner from '../components/CuponBanner';
+import BotonAgregarCarrito from '../components/BotonAgregarCarrito';
 import './ComboDetalle.css';
 
 function ComboDetalle() {
@@ -70,6 +71,12 @@ function ComboDetalle() {
             </div>
 
             <CuponBanner cupon={cupon} precioBase={combo.precio_combo} />
+
+            <BotonAgregarCarrito
+              idCombo={combo.id_combo}
+              nombre={combo.nombre}
+              conCantidad
+            />
 
             <div className="detalle-seccion">
               <h3>Descripción</h3>

@@ -1,0 +1,96 @@
+.auth-page {
+  min-height: calc(100vh - 64px - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-light);
+  padding: 40px 16px;
+}
+
+.auth-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-card-ancha {
+  max-width: 560px;
+}
+
+.auth-emoji {
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+}
+
+.auth-titulo {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+
+.auth-subtitulo {
+  color: var(--text-light);
+  font-size: 0.92rem;
+  margin-bottom: 24px;
+}
+
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-fila {
+  display: flex;
+  gap: 16px;
+}
+
+.auth-boton.MuiButton-root {
+  background: var(--secondary);
+  border-radius: 10px;
+  text-transform: none;
+  font-weight: 600;
+  font-family: 'Poppins', system-ui, sans-serif;
+  padding: 10px 0;
+}
+
+.auth-boton.MuiButton-root:hover {
+  background: var(--secondary-dark);
+}
+
+.auth-divider.MuiDivider-root {
+  width: 100%;
+  margin: 22px 0 18px;
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+
+.auth-google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.auth-pie {
+  margin-top: 22px;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.auth-pie a {
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .auth-fila {
+    flex-direction: column;
+    gap: 18px;
+  }
+}

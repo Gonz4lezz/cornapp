@@ -7,6 +7,7 @@ import {
 } from '../services/api';
 import { formatoMoneda } from '../utils/format';
 import CuponBanner from '../components/CuponBanner';
+import BotonAgregarCarrito from '../components/BotonAgregarCarrito';
 import './ProductoDetalle.css';
 
 function ProductoDetalle() {
@@ -76,6 +77,12 @@ function ProductoDetalle() {
             </div>
 
             <CuponBanner cupon={cupon} precioBase={producto.precio_base} />
+
+            <BotonAgregarCarrito
+              idProducto={producto.id_producto}
+              nombre={producto.nombre}
+              conCantidad
+            />
 
             <div className="detalle-seccion">
               <h3>Descripción</h3>
