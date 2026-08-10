@@ -12,6 +12,8 @@ import { useAuth } from '../context/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import './PedidosPage.css';
 import './PedidoDetallePage.css';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+
 
 const claseEstado = (nombre) =>
   `pedido-estado pedido-estado-${String(nombre)
@@ -135,11 +137,11 @@ function PedidoDetallePage() {
               <span className="factura-valor">
                 {pedido.tipo_entrega === 'domicilio'
                   ? 'Entrega a domicilio'
-                  : 'Recogida en tienda'}
+                  : 'Retiro en tienda'}
               </span>
               {pedido.envio && (
                 <span className="factura-subvalor">
-                  📍 {pedido.envio.direccion_texto}
+                  <LocationOnIcon fontSize="small"/> {pedido.envio.direccion_texto}
                 </span>
               )}
             </div>

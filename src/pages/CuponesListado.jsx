@@ -34,7 +34,6 @@ function CuponesListado() {
       <div className="page-content">
         {cupones.length === 0 ? (
           <div className="cupones-vacio">
-            <span className="cupones-vacio-icono">🎟️</span>
             <h3>No hay cupones disponibles</h3>
             <p>Volvé pronto, seguimos preparando nuevas promociones.</p>
           </div>

@@ -10,6 +10,7 @@ import {
 } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import './PedidosPage.css';
+import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
 
 const claseEstado = (nombre) =>
   `pedido-estado pedido-estado-${String(nombre)
@@ -111,7 +112,7 @@ function PedidosPage() {
           <div className="loading">Cargando pedidos...</div>
         ) : pedidos.length === 0 ? (
           <div className="pedidos-vacio">
-            <span>📭</span>
+            <CancelPresentationIcon fontSize="large" />
             <p>
               {esPersonal
                 ? 'No hay pedidos que coincidan con los filtros.'
@@ -148,7 +149,7 @@ function PedidosPage() {
                     <td>
                       {pedido.tipo_entrega === 'domicilio'
                         ? 'A domicilio'
-                        : 'Recogida'}
+                        : 'Retiro en tienda'}
                     </td>
                     <td>{pedido.metodo_pago ?? '—'}</td>
                     <td className="pedidos-total">

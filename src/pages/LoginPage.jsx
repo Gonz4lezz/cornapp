@@ -116,7 +116,7 @@ function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <span className="auth-emoji">🌭</span>
+        <span className="auth-emoji"></span>
         <h1 className="auth-titulo">Iniciar sesión</h1>
         <p className="auth-subtitulo">
           Ingresa a tu cuenta para hacer pedidos y ver tu historial

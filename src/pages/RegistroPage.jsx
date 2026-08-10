@@ -94,7 +94,6 @@ function RegistroPage() {
   return (
     <div className="auth-page">
       <div className="auth-card auth-card-ancha">
-        <span className="auth-emoji">🌭</span>
         <h1 className="auth-titulo">Crear cuenta</h1>
         <p className="auth-subtitulo">
           Regístrate como cliente para ordenar tus corn dogs favoritos

@@ -128,31 +128,12 @@ function CocinaPage() {
               </MenuItem>
             ))}
           </TextField>
-
-          <div className="cocina-leyenda">
-            <span className="leyenda-item leyenda-pendiente">Pendiente</span>
-            <span className="leyenda-item leyenda-proceso">En proceso</span>
-            <span className="leyenda-item leyenda-completado">Completado</span>
-            {estaciones.map((estacion) => (
-              <span
-                key={estacion.id_estacion}
-                className="leyenda-item"
-                style={{
-                  borderColor: estacion.color_estacion,
-                  color: estacion.color_estacion,
-                }}
-              >
-                {estacion.nombre}
-              </span>
-            ))}
-          </div>
         </div>
 
         {cargando ? (
           <div className="loading">Cargando tablero de cocina...</div>
         ) : pedidos.length === 0 ? (
           <div className="cocina-vacio">
-            <span>👨‍🍳</span>
             <h2>No hay pedidos en preparación</h2>
             <p>
               Cuando el encargado acepte un pedido aparecerá aquí
@@ -170,8 +151,8 @@ function CocinaPage() {
                   </div>
                   <span className="cocina-pedido-entrega">
                     {pedido.tipo_entrega === 'domicilio'
-                      ? '🛵 Domicilio'
-                      : '🏪 Recogida'}
+                      ? 'Domicilio'
+                      : 'Retiro en local'}
                   </span>
                 </header>
 
@@ -196,7 +177,7 @@ function CocinaPage() {
                           )}
                           {item.observaciones && (
                             <span className="cocina-item-obs">
-                              📝 {item.observaciones}
+                              {item.observaciones}
                             </span>
                           )}
                         </div>

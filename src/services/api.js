@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE = 'http://localhost:81/cornapp-project';
+export const API_BASE = 'http://localhost:81/cornapp';
 
 // Client ID de Google para el inicio de sesión (Google Identity Services)
 export const GOOGLE_CLIENT_ID =

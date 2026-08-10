@@ -25,7 +25,7 @@ function BotonAgregarCarrito({
 
   const alAgregar = async () => {
     if (!usuario) {
-      toast('Inicia sesión para agregar artículos al carrito', { icon: '🔒' });
+      toast('Inicia sesión para agregar artículos al carrito');
       navigate('/login');
       return;
     }
@@ -69,7 +69,7 @@ function BotonAgregarCarrito({
         onClick={alAgregar}
         disabled={agregando}
       >
-        🛒 {agregando ? 'Agregando…' : 'Agregar al carrito'}
+        {agregando ? 'Agregando…' : 'Agregar al carrito'}
       </button>
     </div>
   );

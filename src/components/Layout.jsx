@@ -57,7 +57,6 @@ function Layout({ children }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
 
   // Reubica el widget real de Google Translate (definido en index.html)
-  // dentro del header, sin reinicializarlo: sigue funcionando igual.
   useEffect(() => {
     const widget = document.getElementById('google_translate_element');
     if (

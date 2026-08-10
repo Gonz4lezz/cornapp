@@ -23,6 +23,8 @@ import { formatoMoneda, extraerErrorAPI } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import './CarritoPage.css';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 
 const TASA_IMPUESTO = 0.13;
 
@@ -173,7 +175,7 @@ function CarritoPage() {
           : numeroOpcional(),
         tipo_entrega: yup
           .string()
-          .oneOf(['recogida', 'domicilio'])
+          .oneOf(['Retiro en local', 'domicilio'])
           .required('Seleccione el método de entrega'),
         id_tarifa: numeroOpcional().when('tipo_entrega', {
           is: 'domicilio',
@@ -435,7 +437,9 @@ function CarritoPage() {
           <h1>Tu carrito</h1>
         </div>
         <div className="carrito-vacio">
-          <span className="carrito-vacio-icono">🛒</span>
+          <span className="carrito-vacio-icono" >
+            <ProductionQuantityLimitsIcon fontSize="large"/>
+          </span>
           <h2>El carrito está vacío</h2>
           <p>Agrega productos o combos del menú para armar tu pedido.</p>
           <Link to="/productos" className="carrito-vacio-boton">
@@ -470,7 +474,7 @@ function CarritoPage() {
 
               <div className="factura-campo">
                 <span className="factura-etiqueta">Estado</span>
-                <span className="factura-estado">Registrado (automático)</span>
+                <span className="factura-estado">Registrado</span>
               </div>
 
               {!esPersonal ? (
@@ -517,9 +521,9 @@ function CarritoPage() {
                     />
                     {clienteSeleccionado && (
                       <div className="factura-cliente-detalle">
-                        <span>✉️ {clienteSeleccionado.correo}</span>
+                        <span>{clienteSeleccionado.correo}</span>
                         {clienteSeleccionado.telefono && (
-                          <span>📞 {clienteSeleccionado.telefono}</span>
+                          <span>{clienteSeleccionado.telefono}</span>
                         )}
                       </div>
                     )}
@@ -546,7 +550,7 @@ function CarritoPage() {
                       <FormControlLabel
                         value="recogida"
                         control={<Radio size="small" />}
-                        label="Recogida en tienda"
+                        label="Retiro en tienda"
                       />
                       <FormControlLabel
                         value="domicilio"
@@ -627,7 +631,7 @@ function CarritoPage() {
                           />
                         ) : (
                           <span className="factura-articulo-placeholder">
-                            🌭
+                            
                           </span>
                         )}
                         <div>
@@ -688,7 +692,7 @@ function CarritoPage() {
                         title="Eliminar línea"
                         onClick={() => eliminar(linea.item.id_carrito)}
                       >
-                        🗑️
+                        <DeleteIcon fontSize="medium" />
                       </button>
                     </td>
                   </tr>
@@ -728,7 +732,7 @@ function CarritoPage() {
               <div className="factura-cupones-lista">
                 {cupones.map((cupon) => (
                   <span key={cupon.id_cupon} className="factura-cupon-chip">
-                    🎟️ {cupon.codigo}
+                     {cupon.codigo}
                     <small>({cupon.nombre_objetivo})</small>
                     <button
                       type="button"

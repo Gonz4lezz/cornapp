@@ -56,7 +56,7 @@ function CuponCard({ cupon }) {
         {cupon.imagen ? (
           <img src={resolveImageUrl(cupon.imagen)} alt={nombreItem} />
         ) : (
-          <div className="cupon-card-img-placeholder">🎟️</div>
+          <div className="cupon-card-img-placeholder">CuponImg</div>
         )}
       </div>
 
