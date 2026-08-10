@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { menuService, resolveImageUrl } from '../services/api';
 import {
   formatoMoneda,
@@ -7,13 +8,30 @@ import {
   formatoHora,
   formatoDias,
 } from '../utils/format';
+import { useAuth } from '../context/AuthContext';
+import { useCarrito } from '../context/CarritoContext';
 import './MenuDetalle.css';
 
 function MenuDetalle() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { usuario, puedeComprar } = useAuth();
+  const { agregar } = useCarrito();
   const [menu, setMenu] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Botón rápido "+" de cada artículo del menú (sin salir de la página)
+  const agregarRapido = (evento, payload, nombre) => {
+    evento.preventDefault();
+    evento.stopPropagation();
+    if (!usuario) {
+      toast('Inicia sesión para agregar artículos al carrito', { icon: '🔒' });
+      navigate('/login');
+      return;
+    }
+    agregar(payload, nombre);
+  };
 
   useEffect(() => {
     menuService
@@ -114,6 +132,22 @@ function MenuDetalle() {
                         {formatoMoneda(prod.precio_base)}
                       </span>
                     </div>
+                    {(!usuario || puedeComprar) && (
+                      <button
+                        type="button"
+                        className="menu-det-agregar"
+                        title="Agregar al carrito"
+                        onClick={(e) =>
+                          agregarRapido(
+                            e,
+                            { id_producto: prod.id_producto, cantidad: 1 },
+                            prod.nombre,
+                          )
+                        }
+                      >
+                        +
+                      </button>
+                    )}
                   </Link>
                 ))}
                 {items.combos.map((combo) => (
@@ -141,6 +175,22 @@ function MenuDetalle() {
                         {formatoMoneda(combo.precio_combo)}
                       </span>
                     </div>
+                    {(!usuario || puedeComprar) && (
+                      <button
+                        type="button"
+                        className="menu-det-agregar"
+                        title="Agregar al carrito"
+                        onClick={(e) =>
+                          agregarRapido(
+                            e,
+                            { id_combo: combo.id_combo, cantidad: 1 },
+                            combo.nombre,
+                          )
+                        }
+                      >
+                        +
+                      </button>
+                    )}
                   </Link>
                 ))}
               </div>

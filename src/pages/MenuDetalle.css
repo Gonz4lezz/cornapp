@@ -133,3 +133,33 @@
     flex-direction: column;
   }
 }
+
+/* Botón rápido para agregar el artículo al carrito desde el menú */
+.menu-det-item {
+  position: relative;
+}
+
+.menu-det-agregar {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.menu-det-agregar:hover {
+  background: var(--secondary-dark);
+  transform: scale(1.08);
+}
