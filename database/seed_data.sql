@@ -20,7 +20,8 @@ INSERT INTO estado_pedido (nombre_estado, descripcion) VALUES
     ('Aceptado',       'El encargado aceptó el pedido y fue enviado a cocina'),                        -- 2
     ('En preparación', 'El pedido se encuentra en preparación en cocina'),                             -- 3
     ('Listo',          'Finalizó su preparación y está listo para entregar o recoger'),                -- 4
-    ('Entregado',      'Ha sido entregado al cliente');                                                -- 5
+    ('En camino',      'El pedido salió del local hacia la dirección del cliente'),                    -- 5
+    ('Entregado',      'Ha sido entregado al cliente');                                                -- 6
 
 INSERT INTO metodo_pago (nombre) VALUES
     ('Tarjeta de crédito'),
@@ -517,7 +518,7 @@ INSERT INTO cupon (codigo, nombre, descripcion, tipo_descuento, valor_descuento,
 -- Los precios ya incluyen IVA: cobrado 6200, IVA desglosado 713.27, base 5486.73
 -- ------------------------------------------------------------
 INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
-    (1, NULL, 5, 'PED-2026-0001', 'recogida', 5486.73, 0.1300, 713.27, 0.00, 0.00, 6200.00, DATE_SUB(NOW(), INTERVAL 9 DAY));
+    (1, NULL, 6, 'PED-2026-0001', 'recogida', 5486.73, 0.1300, 713.27, 0.00, 0.00, 6200.00, DATE_SUB(NOW(), INTERVAL 9 DAY));
 
 INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
     (1, 1,  NULL, 2, 2500.00, 5000.00, 0.00, 'Con bastante ketchup y mostaza'),      -- detalle 1
@@ -531,7 +532,7 @@ INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, c
     (1, 2, 3,    'Pedido aceptado y enviado a cocina',           DATE_SUB(NOW(), INTERVAL '8 23:55' DAY_MINUTE)),
     (1, 3, 4,    'Cocina inició la preparación',                 DATE_SUB(NOW(), INTERVAL '8 23:50' DAY_MINUTE)),
     (1, 4, 4,    'Preparación finalizada, listo para recoger',   DATE_SUB(NOW(), INTERVAL '8 23:40' DAY_MINUTE)),
-    (1, 5, 3,    'Pedido entregado al cliente',                  DATE_SUB(NOW(), INTERVAL '8 23:30' DAY_MINUTE));
+    (1, 6, 3,    'Pedido entregado al cliente',                  DATE_SUB(NOW(), INTERVAL '8 23:30' DAY_MINUTE));
 
 INSERT INTO orden_cocina (id_pedido, estado, iniciado_en, completado_en, creado_en) VALUES
     (1, 'completado', DATE_SUB(NOW(), INTERVAL '8 23:50' DAY_MINUTE), DATE_SUB(NOW(), INTERVAL '8 23:40' DAY_MINUTE), DATE_SUB(NOW(), INTERVAL '8 23:55' DAY_MINUTE));  -- orden 1
@@ -543,28 +544,34 @@ INSERT INTO item_orden_cocina (id_orden_cocina, id_detalle, id_producto, cantida
 -- ------------------------------------------------------------
 -- Pedido 2 (PED-2026-0002) — María, A DOMICILIO, efectivo, ENTREGADO (hace 5 días)
 -- 1x Combo Familiar (₡9000) + 2x Gaseosa (₡900)
--- Cobrado 10800 (IVA incluido 1242.48, base 9557.52) + envío 800 (Zona media)
--- Total 11600.00 — efectivo: recibió 15000, vuelto 3400.00
+-- Cobrado 10800 (IVA incluido 1242.48, base 9557.52) + envío 882 (Zona cercana:
+-- 500 de base + 200 por km x 1,91 km). Total 11682.00 — efectivo 15000, vuelto 3318.00
 -- ------------------------------------------------------------
 INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
-    (2, NULL, 5, 'PED-2026-0002', 'domicilio', 9557.52, 0.1300, 1242.48, 800.00, 0.00, 11600.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
+    (2, NULL, 6, 'PED-2026-0002', 'domicilio', 9557.52, 0.1300, 1242.48, 882.00, 0.00, 11682.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
 INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
     (2, NULL, 3, 1, 9000.00, 9000.00, 0.00, 'Los corn dogs bien dorados por favor'),  -- detalle 3
     (2, 16, NULL, 2, 900.00, 1800.00, 0.00, NULL);                                    -- detalle 4
 
 INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, efectivo_recibido, vuelto, procesado_en) VALUES
-    (2, 3, 11600.00, 'completado', 'TXN-SIM-0002', 15000.00, 3400.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
+    (2, 3, 11682.00, 'completado', 'TXN-SIM-0002', 15000.00, 3318.00, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
-INSERT INTO envio (id_pedido, id_tarifa, costo_envio, direccion_texto, referencia, nombre_receptor, telefono_receptor) VALUES
-    (2, 2, 800.00, 'Alajuela centro, del parque Juan Santamaría 200 m norte y 50 m este, casa blanca de dos plantas', 'Portón negro, timbre a la derecha', 'María Rodríguez Soto', '8888-2222');
+INSERT INTO envio (id_pedido, id_tarifa, costo_envio, distancia_km, duracion_estimada_min,
+                   direccion_texto, latitud, longitud, referencia, nombre_receptor, telefono_receptor,
+                   tstamp_salida, tstamp_entrega) VALUES
+    (2, 1, 882.00, 1.91, 5,
+     'Alajuela centro, del parque Juan Santamaría 200 m norte y 50 m este, casa blanca de dos plantas',
+     10.02900000, -84.20000000, 'Portón negro, timbre a la derecha', 'María Rodríguez Soto', '8888-2222',
+     DATE_SUB(NOW(), INTERVAL '4 23:10' DAY_MINUTE), DATE_SUB(NOW(), INTERVAL '4 22:55' DAY_MINUTE));
 
 INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, comentario, cambiado_en) VALUES
     (2, 1, 2, 'Pedido registrado y pagado por el cliente',  DATE_SUB(NOW(), INTERVAL '5 0:00' DAY_MINUTE)),
     (2, 2, 3, 'Pedido aceptado y enviado a cocina',         DATE_SUB(NOW(), INTERVAL '4 23:52' DAY_MINUTE)),
     (2, 3, 4, 'Cocina inició la preparación',               DATE_SUB(NOW(), INTERVAL '4 23:48' DAY_MINUTE)),
     (2, 4, 4, 'Preparación finalizada',                     DATE_SUB(NOW(), INTERVAL '4 23:30' DAY_MINUTE)),
-    (2, 5, 3, 'Pedido entregado a domicilio',               DATE_SUB(NOW(), INTERVAL '4 22:55' DAY_MINUTE));
+    (2, 5, 3, 'El pedido salió del local hacia el cliente', DATE_SUB(NOW(), INTERVAL '4 23:10' DAY_MINUTE)),
+    (2, 6, 3, 'Pedido entregado a domicilio',               DATE_SUB(NOW(), INTERVAL '4 22:55' DAY_MINUTE));
 
 INSERT INTO orden_cocina (id_pedido, estado, iniciado_en, completado_en, creado_en) VALUES
     (2, 'completado', DATE_SUB(NOW(), INTERVAL '4 23:48' DAY_MINUTE), DATE_SUB(NOW(), INTERVAL '4 23:30' DAY_MINUTE), DATE_SUB(NOW(), INTERVAL '4 23:52' DAY_MINUTE));  -- orden 2
@@ -658,3 +665,44 @@ INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, ulti
 
 INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, comentario, cambiado_en) VALUES
     (5, 1, 1, 'Pedido registrado y pagado por el cliente', DATE_SUB(NOW(), INTERVAL 15 MINUTE));
+
+-- ------------------------------------------------------------
+-- Pedido 6 (PED-2026-0006) — María, A DOMICILIO, efectivo, EN CAMINO:
+-- salió del local hace 4 minutos y la duración estimada es de 13, así que
+-- al reimportar el mapa de seguimiento siempre muestra al repartidor
+-- avanzando por la ruta.
+-- 2x Corn Dog Clásico (₡2500) + 1x Papas Fritas Clásicas (₡1500)
+-- Cobrado 6500 (IVA incluido 747.79, base 5752.21) + envío 2075 (Zona media:
+-- 800 de base + 250 por km x 5,10 km). Total 8575.00 — efectivo 10000, vuelto 1425.00
+-- ------------------------------------------------------------
+INSERT INTO pedido (id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega, subtotal, tasa_impuesto, monto_impuesto, costo_envio, monto_descuento, monto_total, creado_en) VALUES
+    (2, NULL, 5, 'PED-2026-0006', 'domicilio', 5752.21, 0.1300, 747.79, 2075.00, 0.00, 8575.00, DATE_SUB(NOW(), INTERVAL 40 MINUTE));
+
+INSERT INTO detalle_pedido (id_pedido, id_producto, id_combo, cantidad, precio_unitario, precio_total, monto_descuento, observaciones) VALUES
+    (6, 1, NULL, 2, 2500.00, 5000.00, 0.00, 'Sin mostaza'),                           -- detalle 11
+    (6, 7, NULL, 1, 1500.00, 1500.00, 0.00, NULL);                                    -- detalle 12
+
+INSERT INTO pago (id_pedido, id_metodo, monto, estado_pago, id_transaccion, efectivo_recibido, vuelto, procesado_en) VALUES
+    (6, 3, 8575.00, 'completado', 'TXN-SIM-0006', 10000.00, 1425.00, DATE_SUB(NOW(), INTERVAL 40 MINUTE));
+
+INSERT INTO envio (id_pedido, id_tarifa, costo_envio, distancia_km, duracion_estimada_min,
+                   direccion_texto, latitud, longitud, referencia, nombre_receptor, telefono_receptor,
+                   repartidor, tstamp_salida) VALUES
+    (6, 2, 2075.00, 5.10, 13,
+     'San Antonio de Alajuela, 300 m este de la escuela, condominio Los Higuerones, casa 14',
+     10.04800000, -84.17800000, 'Apartamento en el segundo piso', 'María Rodríguez Soto', '8888-2222',
+     'Luis Vargas', DATE_SUB(NOW(), INTERVAL 4 MINUTE));
+
+INSERT INTO seguimiento_pedido (id_pedido, id_estado, cambiado_por_usuario_id, comentario, cambiado_en) VALUES
+    (6, 1, 2, 'Pedido registrado y pagado por el cliente',  DATE_SUB(NOW(), INTERVAL 40 MINUTE)),
+    (6, 2, 3, 'Pedido aceptado y enviado a cocina',         DATE_SUB(NOW(), INTERVAL 36 MINUTE)),
+    (6, 3, 4, 'Cocina inició la preparación',               DATE_SUB(NOW(), INTERVAL 34 MINUTE)),
+    (6, 4, 4, 'Preparación finalizada, listo para entregar',DATE_SUB(NOW(), INTERVAL 20 MINUTE)),
+    (6, 5, 3, 'El pedido salió del local hacia el cliente', DATE_SUB(NOW(), INTERVAL 4 MINUTE));
+
+INSERT INTO orden_cocina (id_pedido, estado, iniciado_en, completado_en, creado_en) VALUES
+    (6, 'completado', DATE_SUB(NOW(), INTERVAL 34 MINUTE), DATE_SUB(NOW(), INTERVAL 20 MINUTE), DATE_SUB(NOW(), INTERVAL 36 MINUTE));  -- orden 5
+
+INSERT INTO item_orden_cocina (id_orden_cocina, id_detalle, id_producto, cantidad, id_estacion_actual, estado, completado_por_usuario_id, iniciado_en, completado_en) VALUES
+    (5, 11, 1, 2, 3, 'completado', 4, DATE_SUB(NOW(), INTERVAL 34 MINUTE), DATE_SUB(NOW(), INTERVAL 22 MINUTE)),
+    (5, 12, 7, 1, 2, 'completado', 4, DATE_SUB(NOW(), INTERVAL 34 MINUTE), DATE_SUB(NOW(), INTERVAL 20 MINUTE));

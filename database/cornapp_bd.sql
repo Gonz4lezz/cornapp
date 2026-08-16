@@ -491,12 +491,13 @@ CREATE TABLE envio (
     id_envio            INT           NOT NULL AUTO_INCREMENT,
     id_pedido           INT           NOT NULL,
     id_tarifa           INT           NULL,
-    repartidor          VARCHAR(100)  NULL,              -- Nombre del repartidor asignado (se asigna en la entrega, Avance 6)
+    repartidor          VARCHAR(100)  NULL,              -- Nombre del repartidor asignado
     costo_envio         DECIMAL(8,2)  NOT NULL,
-    distancia_km        DECIMAL(6,2)  NULL,              -- Kilómetros calculados desde el local (mapa, Avance 6)
-    -- Dirección capturada al momento del pedido (el mapa llega en el Avance 6)
-    direccion_texto     VARCHAR(500)  NOT NULL,          -- Dirección legible indicada por el cliente
-    latitud             DECIMAL(10,8) NULL,              -- Coordenada del punto elegido en el mapa (Avance 6)
+    distancia_km        DECIMAL(6,2)  NULL,              -- Kilómetros en línea recta desde el local
+    duracion_estimada_min INT         NULL,              -- Minutos estimados de recorrido (para el seguimiento)
+    -- Dirección capturada en el mapa al momento del pedido
+    direccion_texto     VARCHAR(500)  NOT NULL,          -- Dirección legible obtenida del mapa
+    latitud             DECIMAL(10,8) NULL,              -- Coordenada del punto marcado en el mapa
     longitud            DECIMAL(11,8) NULL,
     referencia          TEXT,                            -- Señas adicionales del cliente
     nombre_receptor     VARCHAR(200)  NULL,
