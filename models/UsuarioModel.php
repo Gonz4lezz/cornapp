@@ -60,6 +60,102 @@ class UsuarioModel
         return $this->db->executeSQL_DML_last($sql);
     }
 
+    // ------------------------------------------------------------------
+    // Mantenimiento de usuarios (solo Administrador)
+    // ------------------------------------------------------------------
+
+    // Todos los usuarios con su rol, opcionalmente filtrados por rol
+    public function getAllMantenimiento($idRol = null)
+    {
+        $filtro = '';
+        if ($idRol !== null && intval($idRol) > 0) {
+            $filtro = 'WHERE u.id_rol = ' . intval($idRol);
+        }
+        return $this->db->executeSQL(
+            "SELECT u.id_usuario, u.id_rol, u.nombre, u.apellido, u.correo, u.telefono,
+                    u.esta_activo, u.creado_en, r.nombre AS rol,
+                    (SELECT COUNT(*) FROM pedido p WHERE p.id_cliente = u.id_usuario) AS cantidad_pedidos
+             FROM usuario u
+             INNER JOIN rol r ON u.id_rol = r.id_rol
+             $filtro
+             ORDER BY u.esta_activo DESC, r.id_rol ASC, u.nombre ASC"
+        ) ?? [];
+    }
+
+    public function getRoles()
+    {
+        return $this->db->executeSQL(
+            "SELECT id_rol, nombre, descripcion FROM rol ORDER BY id_rol ASC"
+        ) ?? [];
+    }
+
+    // Alta de personal (Encargado o Cocina) hecha por el administrador
+    public function crearPersonal($data)
+    {
+        $idRol    = intval($data['id_rol']);
+        $nombre   = $this->db_escape($data['nombre']);
+        $apellido = $this->db_escape($data['apellido']);
+        $correo   = $this->db_escape($data['correo']);
+        $telefono = !empty($data['telefono'])
+            ? "'" . $this->db_escape($data['telefono']) . "'" : 'NULL';
+        $hash = password_hash($data['contrasena'], PASSWORD_BCRYPT);
+
+        return $this->db->executeSQL_DML_last(
+            "INSERT INTO usuario (id_rol, nombre, apellido, correo, telefono, contrasena_hash)
+             VALUES ($idRol, '$nombre', '$apellido', '$correo', $telefono, '$hash')"
+        );
+    }
+
+    /**
+     * Actualiza los datos del usuario. La contraseña solo se cambia si viene
+     * en el payload; si va vacía, se conserva la que ya tenía.
+     */
+    public function update($id, $data)
+    {
+        $id       = intval($id);
+        $idRol    = intval($data['id_rol']);
+        $nombre   = $this->db_escape($data['nombre']);
+        $apellido = $this->db_escape($data['apellido']);
+        $correo   = $this->db_escape($data['correo']);
+        $telefono = !empty($data['telefono'])
+            ? "'" . $this->db_escape($data['telefono']) . "'" : 'NULL';
+
+        $cambioClave = '';
+        if (!empty($data['contrasena'])) {
+            $hash = password_hash($data['contrasena'], PASSWORD_BCRYPT);
+            $cambioClave = ", contrasena_hash = '$hash'";
+        }
+
+        $this->db->executeSQL_DML(
+            "UPDATE usuario
+             SET id_rol = $idRol, nombre = '$nombre', apellido = '$apellido',
+                 correo = '$correo', telefono = $telefono $cambioClave
+             WHERE id_usuario = $id"
+        );
+        return true;
+    }
+
+    public function setActivo($id, $activo)
+    {
+        $id = intval($id);
+        $valor = $activo ? 1 : 0;
+        return $this->db->executeSQL_DML(
+            "UPDATE usuario SET esta_activo = $valor WHERE id_usuario = $id"
+        );
+    }
+
+    // El correo debe ser único; al editar se excluye el propio usuario
+    public function correoEnUso($correo, $idExcluir = null)
+    {
+        $correo = $this->db_escape($correo);
+        $sql = "SELECT id_usuario FROM usuario WHERE correo = '$correo'";
+        if ($idExcluir !== null) {
+            $sql .= ' AND id_usuario <> ' . intval($idExcluir);
+        }
+        $result = $this->db->executeSQL($sql . ' LIMIT 1');
+        return is_array($result) && count($result) > 0;
+    }
+
     // Lista de clientes activos (para que el encargado registre pedidos a nombre de uno)
     public function getClientes()
     {
