@@ -6,6 +6,14 @@ class PedidoModel
     // suma: se desglosa del precio con la fórmula monto * tasa / (1 + tasa).
     const TASA_IMPUESTO = 0.13;
 
+    // Estados del pedido (coinciden con los id de la tabla estado_pedido)
+    const ESTADO_REGISTRADO     = 1;
+    const ESTADO_ACEPTADO       = 2;
+    const ESTADO_EN_PREPARACION = 3;
+    const ESTADO_LISTO          = 4;
+    const ESTADO_EN_CAMINO      = 5;
+    const ESTADO_ENTREGADO      = 6;
+
     // Desglosa el IVA contenido en un monto que ya lo incluye
     public static function impuestoIncluido($montoConImpuesto)
     {
@@ -43,9 +51,35 @@ class PedidoModel
     public function getTarifasEnvio()
     {
         return $this->db->executeSQL(
-            "SELECT id_tarifa, nombre, tarifa_base, distancia_maxima_km
+            "SELECT id_tarifa, nombre, tarifa_base, precio_por_km, distancia_maxima_km
              FROM tarifa_envio WHERE esta_activo = 1 ORDER BY tarifa_base ASC"
         ) ?? [];
+    }
+
+    /**
+     * Tarifa que corresponde a una distancia: la más barata cuyo alcance
+     * cubre los kilómetros indicados. Devuelve null si ninguna llega.
+     */
+    public function getTarifaPorDistancia($km)
+    {
+        $km = floatval($km);
+        $result = $this->db->executeSQL(
+            "SELECT id_tarifa, nombre, tarifa_base, precio_por_km, distancia_maxima_km
+             FROM tarifa_envio
+             WHERE esta_activo = 1 AND distancia_maxima_km >= $km
+             ORDER BY distancia_maxima_km ASC
+             LIMIT 1"
+        );
+        return (is_array($result) && count($result) > 0) ? $result[0] : null;
+    }
+
+    // Distancia máxima que cubre el servicio de envío (la mayor tarifa activa)
+    public function getDistanciaMaximaEnvio()
+    {
+        $result = $this->db->executeSQL(
+            "SELECT MAX(distancia_maxima_km) AS maxima FROM tarifa_envio WHERE esta_activo = 1"
+        );
+        return floatval($result[0]->maxima ?? 0);
     }
 
     public function getTarifa($idTarifa)
@@ -148,16 +182,29 @@ class PedidoModel
             $telefono = $envio['telefono_receptor'] !== null && trim($envio['telefono_receptor']) !== ''
                 ? "'" . $this->db_escape(trim($envio['telefono_receptor'])) . "'" : 'NULL';
 
+            // Coordenadas y distancia calculadas al marcar el punto en el mapa
+            $latitud   = floatval($envio['latitud']);
+            $longitud  = floatval($envio['longitud']);
+            $distancia = floatval($envio['distancia_km']);
+            $duracion  = intval($envio['duracion_estimada_min']);
+
             $this->db->executeSQL_DML(
-                "INSERT INTO envio (id_pedido, id_tarifa, costo_envio, direccion_texto, referencia,
+                "INSERT INTO envio (id_pedido, id_tarifa, costo_envio, distancia_km, duracion_estimada_min,
+                                    direccion_texto, latitud, longitud, referencia,
                                     nombre_receptor, telefono_receptor)
-                 VALUES ($idPedido, $idTarifa, $costoEnvio, '$direccion', $referencia,
+                 VALUES ($idPedido, $idTarifa, $costoEnvio, $distancia, $duracion,
+                         '$direccion', $latitud, $longitud, $referencia,
                          '$receptor', $telefono)"
             );
         }
 
         $registradoPor = $encabezado['id_empleado'] ? intval($encabezado['id_empleado']) : $idCliente;
-        $this->registrarSeguimiento($idPedido, 1, $registradoPor, 'Pedido registrado y pagado');
+        $this->registrarSeguimiento(
+            $idPedido,
+            self::ESTADO_REGISTRADO,
+            $registradoPor,
+            'Pedido registrado y pagado'
+        );
 
         return $idPedido;
     }
@@ -262,7 +309,9 @@ class PedidoModel
 
         $envio = $this->db->executeSQL(
             "SELECT e.direccion_texto, e.referencia, e.costo_envio,
-                    e.nombre_receptor, e.telefono_receptor, t.nombre AS tarifa
+                    e.nombre_receptor, e.telefono_receptor, t.nombre AS tarifa,
+                    e.latitud, e.longitud, e.distancia_km, e.duracion_estimada_min,
+                    e.repartidor, e.tstamp_salida, e.tstamp_entrega
              FROM envio e
              LEFT JOIN tarifa_envio t ON e.id_tarifa = t.id_tarifa
              WHERE e.id_pedido = $idPedido
@@ -287,7 +336,7 @@ class PedidoModel
     {
         $idPedido = intval($idPedido);
         $result = $this->db->executeSQL(
-            "SELECT id_pedido, id_cliente, id_empleado, id_estado, numero_pedido
+            "SELECT id_pedido, id_cliente, id_empleado, id_estado, numero_pedido, tipo_entrega
              FROM pedido WHERE id_pedido = $idPedido LIMIT 1"
         );
         return (is_array($result) && count($result) > 0) ? $result[0] : null;
@@ -306,6 +355,36 @@ class PedidoModel
         );
         $this->registrarSeguimiento($idPedido, $idEstado, $idUsuario, $comentario);
         return true;
+    }
+
+    /**
+     * Despacha un pedido a domicilio: registra la salida del local y el
+     * repartidor asignado, y deja el pedido "En camino".
+     */
+    public function despachar($idPedido, $idUsuario, $repartidor)
+    {
+        $idPedido = intval($idPedido);
+        $nombre = "'" . $this->db_escape($repartidor) . "'";
+        $this->db->executeSQL_DML(
+            "UPDATE envio SET tstamp_salida = NOW(), repartidor = $nombre
+             WHERE id_pedido = $idPedido"
+        );
+        $this->cambiarEstado(
+            $idPedido,
+            self::ESTADO_EN_CAMINO,
+            $idUsuario,
+            'El pedido salió del local hacia el cliente'
+        );
+        return true;
+    }
+
+    // Marca la hora de llegada del envío (solo pedidos a domicilio)
+    public function registrarEntregaEnvio($idPedido)
+    {
+        $idPedido = intval($idPedido);
+        return $this->db->executeSQL_DML(
+            "UPDATE envio SET tstamp_entrega = NOW() WHERE id_pedido = $idPedido"
+        );
     }
 
     public function registrarSeguimiento($idPedido, $idEstado, $idUsuario, $comentario)
@@ -363,7 +442,12 @@ class PedidoModel
              WHERE d.id_pedido = $idPedido AND d.id_combo IS NOT NULL"
         );
 
-        $this->cambiarEstado($idPedido, 2, $idUsuario, 'Pedido aceptado y enviado a cocina');
+        $this->cambiarEstado(
+            $idPedido,
+            self::ESTADO_ACEPTADO,
+            $idUsuario,
+            'Pedido aceptado y enviado a cocina'
+        );
         return true;
     }
 

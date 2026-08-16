@@ -47,7 +47,10 @@ class CocinaController
         if ($item->estado_orden === 'pendiente') {
             $this->model->iniciarOrden($item->id_orden_cocina);
             $this->pedidoModel->cambiarEstado(
-                $item->id_pedido, 3, $usuario->id_usuario, 'Cocina inició la preparación'
+                $item->id_pedido,
+                PedidoModel::ESTADO_EN_PREPARACION,
+                $usuario->id_usuario,
+                'Cocina inició la preparación'
             );
         }
 
@@ -73,7 +76,10 @@ class CocinaController
         if (!$this->model->quedanItemsPendientes($item->id_orden_cocina)) {
             $this->model->completarOrden($item->id_orden_cocina);
             $this->pedidoModel->cambiarEstado(
-                $item->id_pedido, 4, $usuario->id_usuario, 'Preparación finalizada, listo para entregar'
+                $item->id_pedido,
+                PedidoModel::ESTADO_LISTO,
+                $usuario->id_usuario,
+                'Preparación finalizada, listo para entregar'
             );
         }
 

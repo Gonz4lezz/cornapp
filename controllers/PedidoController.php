@@ -28,7 +28,38 @@ class PedidoController
             'estados' => $this->model->getEstados(),
             'metodosPago' => $this->model->getMetodosPago(),
             'tarifasEnvio' => $this->model->getTarifasEnvio(),
+            'restaurante' => $this->ubicacionRestaurante(),
+            'distanciaMaximaKm' => $this->model->getDistanciaMaximaEnvio(),
         ]);
+    }
+
+    /**
+     * POST /PedidoController/cotizarEnvio — recibe el punto marcado en el mapa
+     * y devuelve la distancia, la tarifa aplicable y el costo del envío.
+     * El cálculo vive en el servidor para que el precio no se pueda manipular.
+     */
+    public function cotizarEnvio()
+    {
+        Auth::requerir(self::ROLES_COMPRA);
+        $data = $this->request->getJSON();
+        $latitud = isset($data->latitud) ? floatval($data->latitud) : null;
+        $longitud = isset($data->longitud) ? floatval($data->longitud) : null;
+
+        if ($latitud === null || $longitud === null || !$this->coordenadaValida($latitud, $longitud)) {
+            $this->response->status(422)->toJSON(null, 'Debe marcar un punto válido en el mapa');
+            return;
+        }
+
+        $cotizacion = $this->cotizar($latitud, $longitud);
+        if ($cotizacion === null) {
+            $this->response->status(409)->toJSON([
+                'distancia_km' => $this->distanciaKm($latitud, $longitud),
+                'distancia_maxima_km' => $this->model->getDistanciaMaximaEnvio(),
+            ], 'La dirección está fuera del área de cobertura del servicio a domicilio');
+            return;
+        }
+
+        $this->response->status(200)->toJSON($cotizacion);
     }
 
     // GET /PedidoController/historial — según el rol:
@@ -105,21 +136,38 @@ class PedidoController
         $costoEnvio = 0.0;
         $envio = null;
         if ($tipoEntrega === 'domicilio') {
-            $tarifa = $this->model->getTarifa(intval($data->id_tarifa ?? 0));
             $direccion = trim($data->direccion ?? '');
-            if (!$tarifa) {
-                $this->response->status(422)->toJSON(null, 'Debe seleccionar la zona de envío');
+            $latitud   = isset($data->latitud) ? floatval($data->latitud) : null;
+            $longitud  = isset($data->longitud) ? floatval($data->longitud) : null;
+
+            if ($latitud === null || $longitud === null || !$this->coordenadaValida($latitud, $longitud)) {
+                $this->response->status(422)->toJSON(null, 'Debe marcar la dirección de entrega en el mapa');
                 return;
             }
             if (mb_strlen($direccion) < 10) {
                 $this->response->status(422)->toJSON(null, 'Debe indicar la dirección de entrega (mínimo 10 caracteres)');
                 return;
             }
-            $costoEnvio = floatval($tarifa->tarifa_base);
+
+            // El costo del envío se recalcula aquí, nunca se toma del navegador
+            $cotizacion = $this->cotizar($latitud, $longitud);
+            if ($cotizacion === null) {
+                $this->response->status(422)->toJSON(
+                    null,
+                    'La dirección está fuera del área de cobertura del servicio a domicilio'
+                );
+                return;
+            }
+
+            $costoEnvio = $cotizacion['costo_envio'];
             $clienteEnvio = $this->usuarioModel->getById($idCliente);
             $envio = [
-                'id_tarifa' => $tarifa->id_tarifa,
+                'id_tarifa' => $cotizacion['id_tarifa'],
                 'direccion' => $direccion,
+                'latitud' => $latitud,
+                'longitud' => $longitud,
+                'distancia_km' => $cotizacion['distancia_km'],
+                'duracion_estimada_min' => $cotizacion['duracion_min'],
                 'referencia' => $data->referencia ?? null,
                 'nombre_receptor' => trim($clienteEnvio->nombre . ' ' . $clienteEnvio->apellido),
                 'telefono_receptor' => $clienteEnvio->telefono,
@@ -249,13 +297,46 @@ class PedidoController
             $this->response->status(404)->toJSON(null, 'Pedido no encontrado');
             return;
         }
-        if (intval($pedido->id_estado) !== 1) {
+        if (intval($pedido->id_estado) !== PedidoModel::ESTADO_REGISTRADO) {
             $this->response->status(409)->toJSON(null, 'Solo se pueden aceptar pedidos en estado Registrado');
             return;
         }
 
         $this->model->aceptar($idPedido, $usuario->id_usuario);
         $this->response->status(200)->toJSON($this->model->getDetalle($idPedido), 'Pedido aceptado y enviado a cocina');
+    }
+
+    // POST /PedidoController/despachar — el pedido a domicilio sale del local
+    public function despachar()
+    {
+        $usuario = Auth::requerir(self::ROLES_GESTION);
+        $data = $this->request->getJSON();
+        $idPedido = intval($data->id_pedido ?? 0);
+        $repartidor = trim($data->repartidor ?? '');
+
+        $pedido = $this->model->getBasico($idPedido);
+        if (!$pedido) {
+            $this->response->status(404)->toJSON(null, 'Pedido no encontrado');
+            return;
+        }
+        if ($pedido->tipo_entrega !== 'domicilio') {
+            $this->response->status(409)->toJSON(null, 'Solo los pedidos a domicilio se despachan');
+            return;
+        }
+        if (intval($pedido->id_estado) !== PedidoModel::ESTADO_LISTO) {
+            $this->response->status(409)->toJSON(null, 'Solo se pueden despachar pedidos que estén Listos');
+            return;
+        }
+        if (mb_strlen($repartidor) < 3) {
+            $this->response->status(422)->toJSON(null, 'Indique el nombre del repartidor asignado');
+            return;
+        }
+
+        $this->model->despachar($idPedido, $usuario->id_usuario, $repartidor);
+        $this->response->status(200)->toJSON(
+            $this->model->getDetalle($idPedido),
+            'Pedido despachado, el cliente ya puede seguirlo en el mapa'
+        );
     }
 
     // POST /PedidoController/entregar — el encargado marca el pedido como entregado
@@ -270,12 +351,34 @@ class PedidoController
             $this->response->status(404)->toJSON(null, 'Pedido no encontrado');
             return;
         }
-        if (intval($pedido->id_estado) !== 4) {
-            $this->response->status(409)->toJSON(null, 'Solo se pueden entregar pedidos que estén Listos');
+
+        // Recogida: se entrega desde Listo. Domicilio: primero debe ir En camino.
+        $estado = intval($pedido->id_estado);
+        $esDomicilio = $pedido->tipo_entrega === 'domicilio';
+        $estadoEsperado = $esDomicilio
+            ? PedidoModel::ESTADO_EN_CAMINO
+            : PedidoModel::ESTADO_LISTO;
+
+        if ($estado !== $estadoEsperado) {
+            $this->response->status(409)->toJSON(
+                null,
+                $esDomicilio
+                    ? 'El pedido debe estar En camino antes de marcarlo como entregado'
+                    : 'Solo se pueden entregar pedidos que estén Listos'
+            );
             return;
         }
 
-        $this->model->cambiarEstado($idPedido, 5, $usuario->id_usuario, 'Pedido entregado al cliente');
+        $this->model->cambiarEstado(
+            $idPedido,
+            PedidoModel::ESTADO_ENTREGADO,
+            $usuario->id_usuario,
+            $esDomicilio ? 'Pedido entregado en la dirección del cliente' : 'Pedido entregado al cliente'
+        );
+        if ($esDomicilio) {
+            $this->model->registrarEntregaEnvio($idPedido);
+        }
+
         $this->response->status(200)->toJSON($this->model->getDetalle($idPedido), 'Pedido marcado como entregado');
     }
 
@@ -283,6 +386,72 @@ class PedidoController
 
     // Descuento de una línea según los cupones aplicados (uno por artículo):
     // porcentaje sobre el total de la línea o monto fijo (una vez por línea).
+    // ---------------- Envío a domicilio ----------------
+
+    // Ubicación del local, punto de partida de todos los envíos
+    private function ubicacionRestaurante()
+    {
+        return [
+            'nombre' => Config::get('RESTAURANTE_NOMBRE', 'CornApp'),
+            'latitud' => floatval(Config::get('RESTAURANTE_LAT', 0)),
+            'longitud' => floatval(Config::get('RESTAURANTE_LNG', 0)),
+        ];
+    }
+
+    private function coordenadaValida($latitud, $longitud)
+    {
+        return $latitud >= -90 && $latitud <= 90
+            && $longitud >= -180 && $longitud <= 180
+            && !($latitud == 0 && $longitud == 0);
+    }
+
+    /**
+     * Distancia en kilómetros entre el local y un punto, con la fórmula de
+     * Haversine (distancia sobre la superficie terrestre entre dos
+     * coordenadas). No depende de ningún servicio externo.
+     */
+    private function distanciaKm($latitud, $longitud)
+    {
+        $radioTierra = 6371; // km
+        $local = $this->ubicacionRestaurante();
+
+        $dLat = deg2rad($latitud - $local['latitud']);
+        $dLng = deg2rad($longitud - $local['longitud']);
+
+        $a = sin($dLat / 2) * sin($dLat / 2)
+            + cos(deg2rad($local['latitud'])) * cos(deg2rad($latitud))
+            * sin($dLng / 2) * sin($dLng / 2);
+
+        return round($radioTierra * 2 * atan2(sqrt($a), sqrt(1 - $a)), 2);
+    }
+
+    /**
+     * Cotiza un envío: distancia, tarifa aplicable, costo y duración estimada.
+     * Devuelve null si el punto queda fuera del alcance de todas las tarifas.
+     */
+    private function cotizar($latitud, $longitud)
+    {
+        $distancia = $this->distanciaKm($latitud, $longitud);
+        $tarifa = $this->model->getTarifaPorDistancia($distancia);
+        if (!$tarifa) {
+            return null;
+        }
+
+        $costo = floatval($tarifa->tarifa_base) + floatval($tarifa->precio_por_km) * $distancia;
+        $velocidad = floatval(Config::get('VELOCIDAD_REPARTO_KMH', 25));
+        $duracion = $velocidad > 0 ? (int) ceil($distancia / $velocidad * 60) : 0;
+
+        return [
+            'id_tarifa' => intval($tarifa->id_tarifa),
+            'tarifa' => $tarifa->nombre,
+            'distancia_km' => $distancia,
+            'costo_envio' => round($costo, 2),
+            'duracion_min' => max(5, $duracion),
+        ];
+    }
+
+    // ---------------- Cálculos del pedido ----------------
+
     private function descuentoDeLinea($item, $cupones, $precioTotal)
     {
         foreach ($cupones as $cupon) {
