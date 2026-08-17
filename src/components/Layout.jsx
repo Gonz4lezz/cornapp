@@ -36,12 +36,14 @@ const linksSegunRol = (usuario) => {
     links.push({ to: '/pedidos', label: 'Mis pedidos' });
   }
   if (rol === 'Encargado') {
+    links.push({ to: '/dashboard', label: 'Tablero' });
     links.push({ to: '/pedidos', label: 'Pedidos' });
   }
   if (rol === 'Cocina') {
     links.push({ to: '/cocina', label: 'Cocina' });
   }
   if (rol === 'Administrador') {
+    links.push({ to: '/dashboard', label: 'Tablero' });
     links.push({ to: '/pedidos', label: 'Pedidos' });
     links.push({ to: '/admin', label: 'Mantenimiento' });
   }
@@ -204,19 +206,19 @@ function Layout({ children }) {
               <h4 className="footer-titulo">Contacto</h4>
               <ul className="footer-contacto">
                 <li>
-                  <LocationOnIcon fontSize="small"/>
+                  <LocationOnIcon fontSize="small" />
                   Alajuela, Costa Rica
                 </li>
                 <li>
-                  <LocalPhoneIcon fontSize="small"/>
+                  <LocalPhoneIcon fontSize="small" />
                   +506 0000-0000
                 </li>
                 <li>
-                  <EmailIcon fontSize="small"/>
+                  <EmailIcon fontSize="small" />
                   cornapp@gmail.com
                 </li>
                 <li>
-                  <AccessTimeIcon fontSize="small"/>
+                  <AccessTimeIcon fontSize="small" />
                   Lun a Dom · 10:00 a. m. – 9:00 p. m.
                 </li>
               </ul>

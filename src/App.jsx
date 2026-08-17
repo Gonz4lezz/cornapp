@@ -30,6 +30,9 @@ import MenuMantenimiento from './pages/admin/MenuMantenimiento';
 import MenuForm from './pages/admin/MenuForm';
 import CuponMantenimiento from './pages/admin/CuponMantenimiento';
 import CuponForm from './pages/admin/CuponForm';
+import UsuarioMantenimiento from './pages/admin/UsuarioMantenimiento';
+import UsuarioForm from './pages/admin/UsuarioForm';
+import DashboardPage from './pages/DashboardPage';
 import './App.css';
 
 const ROLES_COMPRA = ['Cliente', 'Encargado', 'Administrador'];
@@ -63,6 +66,14 @@ function App() {
                 element={
                   <ProtectedRoute roles={ROLES_COMPRA}>
                     <CarritoPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute roles={['Administrador', 'Encargado']}>
+                    <DashboardPage />
                   </ProtectedRoute>
                 }
               />
@@ -195,6 +206,30 @@ function App() {
                 element={
                   <ProtectedRoute roles={['Administrador']}>
                     <MenuForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/usuarios"
+                element={
+                  <ProtectedRoute roles={['Administrador']}>
+                    <UsuarioMantenimiento />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/usuarios/nuevo"
+                element={
+                  <ProtectedRoute roles={['Administrador']}>
+                    <UsuarioForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/usuarios/:id/editar"
+                element={
+                  <ProtectedRoute roles={['Administrador']}>
+                    <UsuarioForm />
                   </ProtectedRoute>
                 }
               />
