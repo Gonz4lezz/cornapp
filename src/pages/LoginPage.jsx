@@ -20,9 +20,12 @@ const schema = yup.object({
 
 // Destino según el rol: cocina entra directo a su módulo
 const rutaSegunRol = (usuario, desde) => {
+  // Cada rol entra directo al módulo con el que trabaja
   if (usuario.rol === 'Cocina') return '/cocina';
-  if (usuario.rol === 'Administrador' && !desde) return '/admin';
-  return desde || '/';
+  if (desde) return desde;
+  if (usuario.rol === 'Administrador') return '/dashboard';
+  if (usuario.rol === 'Encargado') return '/dashboard';
+  return '/';
 };
 
 function LoginPage() {
