@@ -1,0 +1,129 @@
+/* ============================================================
+   Mapas (Leaflet): estilos compartidos por la selección de
+   dirección y el seguimiento del envío.
+   ============================================================ */
+
+/* Pines dibujados con HTML en vez de imágenes */
+.mapa-icono {
+  background: transparent;
+  border: none;
+}
+
+.mapa-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.25rem;
+  line-height: 1;
+  background: #fff;
+  border: 2px solid var(--pin-color, var(--secondary));
+  border-radius: 50% 50% 50% 6px;
+  box-shadow: 0 2px 6px rgba(33, 18, 6, 0.35);
+}
+
+/* ---------- Selección de dirección ---------- */
+.mapa-direccion {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.mapa-direccion-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.mapa-direccion-ayuda {
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
+.mapa-direccion-boton {
+  background: var(--tertiary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.mapa-direccion-boton:hover {
+  background: var(--secondary-dark);
+}
+
+.mapa-direccion-boton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.mapa-direccion-lienzo {
+  height: 320px;
+  width: 100%;
+}
+
+/* ---------- Seguimiento del envío ---------- */
+.mapa-seguimiento {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.mapa-seguimiento-lienzo {
+  height: 340px;
+  width: 100%;
+}
+
+.mapa-seguimiento-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.mapa-seguimiento-estado {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--tertiary);
+}
+
+.mapa-seguimiento-dato {
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
+.mapa-seguimiento-dato strong {
+  color: var(--secondary-dark);
+}
+
+.mapa-seguimiento-aviso {
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  color: var(--text-light);
+  background: #fffbeb;
+  border-top: 1px solid #fcd34d;
+}
+
+/* La atribución de OpenStreetMap debe quedar legible */
+.leaflet-container {
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 0.75rem;
+}
