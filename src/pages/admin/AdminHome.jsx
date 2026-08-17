@@ -5,6 +5,7 @@ import AutoAwesomeMosaicRoundedIcon from '@mui/icons-material/AutoAwesomeMosaicR
 import OutdoorGrillRoundedIcon from '@mui/icons-material/OutdoorGrillRounded';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import LocalActivityRoundedIcon from '@mui/icons-material/LocalActivityRounded';
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 
 const secciones = [
   {
@@ -12,33 +13,49 @@ const secciones = [
     titulo: 'Productos',
     descripcion:
       'Gestioná los productos del catálogo: corn dogs, acompañamientos y bebidas.',
-    icono: <CategoryIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
+    icono: <CategoryIcon fontSize="large" sx={{ color: '#ff8e42' }} />,
   },
   {
     to: '/admin/combos',
     titulo: 'Combos',
     descripcion: 'Administrá los combos y los productos que los componen.',
-    icono: <AutoAwesomeMosaicRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
+    icono: (
+      <AutoAwesomeMosaicRoundedIcon
+        fontSize="large"
+        sx={{ color: '#ff8e42' }}
+      />
+    ),
   },
   {
     to: '/admin/procesos',
     titulo: 'Procesos de Preparación',
     descripcion: 'Definí el paso a paso de cocina para cada producto.',
-    icono: <OutdoorGrillRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
+    icono: (
+      <OutdoorGrillRoundedIcon fontSize="large" sx={{ color: '#ff8e42' }} />
+    ),
   },
   {
     to: '/admin/menus',
     titulo: 'Menús',
     descripcion:
       'Configurá los menús con sus productos, combos, fechas y horarios.',
-    icono: <MenuBookRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
+    icono: <MenuBookRoundedIcon fontSize="large" sx={{ color: '#ff8e42' }} />,
   },
   {
     to: '/admin/cupones',
     titulo: 'Cupones',
     descripcion:
       'Creá y administrá los cupones de descuento por producto o combo.',
-    icono: <LocalActivityRoundedIcon fontSize='large' sx={{ color: '#ff8e42' }}/>,
+    icono: (
+      <LocalActivityRoundedIcon fontSize="large" sx={{ color: '#ff8e42' }} />
+    ),
+  },
+  {
+    to: '/admin/usuarios',
+    titulo: 'Usuarios',
+    descripcion:
+      'Consultá las cuentas registradas y creá el personal de encargado y cocina.',
+    icono: <GroupRoundedIcon fontSize="large" sx={{ color: '#ff8e42' }} />,
   },
 ];
 
