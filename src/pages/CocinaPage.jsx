@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { TextField, MenuItem } from '@mui/material';
 import { cocinaService, estacionService } from '../services/api';
 import { formatoFechaHora, extraerErrorAPI } from '../utils/format';
+import FiltroBotones from '../components/FiltroBotones';
 import './CocinaPage.css';
 
 const INTERVALO_POLLING = 7000; // ms: el tablero se refresca solo (tiempo real)
@@ -113,22 +113,19 @@ function CocinaPage() {
 
       <div className="page-content">
         <div className="cocina-controles">
-          <TextField
-            size="small"
-            select
-            label="Estación de trabajo"
-            value={filtroEstacion}
-            onChange={(e) => setFiltroEstacion(e.target.value)}
-            className="cocina-filtro"
-            style={{ minWidth: '200px' }}
-          >
-            <MenuItem value="">Todas las estaciones</MenuItem>
-            {estaciones.map((estacion) => (
-              <MenuItem key={estacion.id_estacion} value={estacion.id_estacion}>
-                {estacion.nombre}
-              </MenuItem>
-            ))}
-          </TextField>
+          <FiltroBotones
+            etiqueta="Estación de trabajo:"
+            valor={filtroEstacion}
+            onCambio={setFiltroEstacion}
+            opciones={[
+              { valor: '', etiqueta: 'Todas las estaciones' },
+              ...estaciones.map((estacion) => ({
+                valor: estacion.id_estacion,
+                etiqueta: estacion.nombre,
+                color: estacion.color_estacion,
+              })),
+            ]}
+          />
         </div>
 
         {cargando ? (

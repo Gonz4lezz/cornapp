@@ -1,0 +1,46 @@
+.filtro-botones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filtro-botones-etiqueta {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.filtro-botones-lista {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filtro-boton {
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.filtro-boton:hover {
+  border-color: var(--color-activo, var(--secondary));
+  color: var(--color-activo, var(--secondary-dark));
+}
+
+.filtro-boton-activo,
+.filtro-boton-activo:hover {
+  background: var(--color-activo, var(--secondary));
+  border-color: var(--color-activo, var(--secondary));
+  color: var(--text-on-dark);
+}

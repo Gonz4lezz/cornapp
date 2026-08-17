@@ -7,23 +7,29 @@ import toast from 'react-hot-toast';
 import { TextField, MenuItem } from '@mui/material';
 import { usuarioService } from '../../services/api';
 import { extraerErrorAPI } from '../../utils/format';
+import CampoContrasena from '../../components/CampoContrasena';
 import './admin-common.css';
 
 // Roles que el administrador puede asignar desde el mantenimiento.
-// Los clientes no se crean aquí: se registran por su cuenta.
-const ROLES_PERSONAL = ['Encargado', 'Cocina', 'Administrador'];
+const ROLES_ASIGNABLES = ['Encargado', 'Cocina'];
+
+// Cuentas cuyo rol no se puede cambiar: el cliente siempre es cliente y
+// el administrador conserva su rol para que el sistema no quede sin uno.
+const ROLES_FIJOS = ['Cliente', 'Administrador'];
 
 const construirSchema = (esEdicion) =>
   yup.object({
     nombre: yup
       .string()
       .required('El nombre es obligatorio')
+      .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, 'El nombre solo puede contener letras y espacios')
       .min(2, 'Debe tener al menos 2 caracteres')
       .max(100, 'No puede exceder 100 caracteres')
       .trim(),
     apellido: yup
       .string()
       .required('El apellido es obligatorio')
+      .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, 'El apellido solo puede contener letras y espacios')
       .min(2, 'Debe tener al menos 2 caracteres')
       .max(100, 'No puede exceder 100 caracteres')
       .trim(),
@@ -66,6 +72,8 @@ function UsuarioForm() {
   const esEdicion = Boolean(id);
 
   const [roles, setRoles] = useState([]);
+  // Nombre del rol cuando la cuenta no admite cambiarlo (cliente o administrador)
+  const [rolFijo, setRolFijo] = useState(null);
   const [cargando, setCargando] = useState(esEdicion);
   const [enviando, setEnviando] = useState(false);
 
@@ -93,13 +101,12 @@ function UsuarioForm() {
     const cargar = async () => {
       try {
         const { data } = await usuarioService.getRoles();
-        const disponibles = (Array.isArray(data) ? data : []).filter((rol) =>
-          ROLES_PERSONAL.includes(rol.nombre),
-        );
-        setRoles(disponibles);
+        const todos = Array.isArray(data) ? data : [];
+        setRoles(todos.filter((rol) => ROLES_ASIGNABLES.includes(rol.nombre)));
 
         if (esEdicion) {
           const { data: usuario } = await usuarioService.getById(id);
+          if (ROLES_FIJOS.includes(usuario.rol)) setRolFijo(usuario.rol);
           reset({
             nombre: usuario.nombre ?? '',
             apellido: usuario.apellido ?? '',
@@ -144,6 +151,13 @@ function UsuarioForm() {
 
   if (cargando) return <div className="loading">Cargando usuario...</div>;
 
+  const ayudaRol =
+    rolFijo === 'Cliente'
+      ? 'La cuenta de un cliente siempre conserva el rol Cliente'
+      : rolFijo === 'Administrador'
+        ? 'El sistema tiene un único administrador y su rol no se cambia'
+        : 'Los clientes se registran por su cuenta desde el sitio';
+
   return (
     <div className="admin-usuario-form">
       <div className="page-header">
@@ -154,7 +168,7 @@ function UsuarioForm() {
         <p>
           {esEdicion
             ? 'Actualizá los datos de la cuenta'
-            : 'Cree la cuenta del personal: encargado, cocina o administrador'}
+            : 'Cree la cuenta del personal: encargado o cocina'}
         </p>
       </div>
 
@@ -164,81 +178,96 @@ function UsuarioForm() {
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="admin-form-row">
-            <TextField
-              label="Nombre"
-              fullWidth
-              error={Boolean(errors.nombre)}
-              helperText={errors.nombre?.message}
-              {...register('nombre')}
-            />
-            <TextField
-              label="Apellido"
-              fullWidth
-              error={Boolean(errors.apellido)}
-              helperText={errors.apellido?.message}
-              {...register('apellido')}
-            />
-          </div>
+          <div className="admin-form-grid">
+            <div>
+              <TextField
+                label="Nombre"
+                fullWidth
+                error={Boolean(errors.nombre)}
+                helperText={errors.nombre?.message}
+                {...register('nombre')}
+              />
+            </div>
+            <div>
+              <TextField
+                label="Apellido"
+                fullWidth
+                error={Boolean(errors.apellido)}
+                helperText={errors.apellido?.message}
+                {...register('apellido')}
+              />
+            </div>
 
-          <div className="admin-form-row">
-            <TextField
-              label="Correo electrónico"
-              type="email"
-              fullWidth
-              error={Boolean(errors.correo)}
-              helperText={errors.correo?.message}
-              {...register('correo')}
-            />
-            <TextField
-              label="Teléfono (opcional)"
-              fullWidth
-              placeholder="8888-8888"
-              error={Boolean(errors.telefono)}
-              helperText={errors.telefono?.message}
-              {...register('telefono')}
-            />
-          </div>
+            <div>
+              <TextField
+                label="Correo electrónico"
+                type="email"
+                fullWidth
+                error={Boolean(errors.correo)}
+                helperText={errors.correo?.message}
+                {...register('correo')}
+              />
+            </div>
+            <div>
+              <TextField
+                label="Teléfono (opcional)"
+                fullWidth
+                placeholder="8888-8888"
+                error={Boolean(errors.telefono)}
+                helperText={errors.telefono?.message}
+                {...register('telefono')}
+              />
+            </div>
 
-          <div className="admin-form-row">
-            <Controller
-              name="id_rol"
-              control={control}
-              render={({ field }) => (
+            <div>
+              {rolFijo ? (
+                // El rol de esta cuenta no se puede cambiar: solo se muestra
                 <TextField
-                  select
                   label="Rol"
                   fullWidth
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  error={Boolean(errors.id_rol)}
-                  helperText={
-                    errors.id_rol?.message ||
-                    'Los clientes se registran por su cuenta desde el sitio'
-                  }
-                >
-                  {roles.map((rol) => (
-                    <MenuItem key={rol.id_rol} value={rol.id_rol}>
-                      {rol.nombre}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                  value={rolFijo}
+                  disabled
+                  helperText={ayudaRol}
+                />
+              ) : (
+                <Controller
+                  name="id_rol"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      select
+                      label="Rol"
+                      fullWidth
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      error={Boolean(errors.id_rol)}
+                      helperText={errors.id_rol?.message || ayudaRol}
+                    >
+                      {roles.map((rol) => (
+                        <MenuItem key={rol.id_rol} value={rol.id_rol}>
+                          {rol.nombre}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
               )}
-            />
-            <TextField
-              label={esEdicion ? 'Nueva contraseña' : 'Contraseña'}
-              type="password"
-              fullWidth
-              autoComplete="new-password"
-              error={Boolean(errors.contrasena)}
-              helperText={
-                errors.contrasena?.message ||
-                (esEdicion
-                  ? 'Dejala en blanco para conservar la actual'
-                  : 'Mínimo 8 caracteres, con letras y números')
-              }
-              {...register('contrasena')}
-            />
+            </div>
+            <div>
+              <CampoContrasena
+                label={esEdicion ? 'Nueva contraseña' : 'Contraseña'}
+                fullWidth
+                autoComplete="new-password"
+                error={Boolean(errors.contrasena)}
+                helperText={
+                  errors.contrasena?.message ||
+                  (esEdicion
+                    ? 'Dejala en blanco para conservar la actual'
+                    : 'Mínimo 8 caracteres, con letras y números')
+                }
+                {...register('contrasena')}
+              />
+            </div>
           </div>
 
           <div className="admin-form-actions">

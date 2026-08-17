@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { TextField, MenuItem } from '@mui/material';
 import { pedidoService } from '../services/api';
 import {
   formatoMoneda,
@@ -9,6 +8,8 @@ import {
   extraerErrorAPI,
 } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
+import CampoFecha from '../components/CampoFecha';
+import FiltroBotones from '../components/FiltroBotones';
 import './PedidosPage.css';
 import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
 
@@ -70,42 +71,38 @@ function PedidosPage() {
       <div className="page-content">
         {esPersonal && (
           <div className="pedidos-filtros">
-            <TextField
-              size="small"
-              type="date"
-              label="Filtrar por fecha"
-              value={filtroFecha}
-              onChange={(e) => setFiltroFecha(e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
+            <FiltroBotones
+              etiqueta="Estado:"
+              valor={filtroEstado}
+              onCambio={setFiltroEstado}
+              opciones={[
+                { valor: '', etiqueta: 'Todos los estados' },
+                ...estados.map((estado) => ({
+                  valor: estado.id_estado,
+                  etiqueta: estado.nombre_estado,
+                })),
+              ]}
             />
-            <TextField
-              size="small"
-              select
-              label="Filtrar por estado"
-              value={filtroEstado}
-              onChange={(e) => setFiltroEstado(e.target.value)}
-              className="pedidos-filtro-estado"
-              style={{ minWidth: '200px' }}
-            >
-              <MenuItem value="">Todos los estados</MenuItem>
-              {estados.map((estado) => (
-                <MenuItem key={estado.id_estado} value={estado.id_estado}>
-                  {estado.nombre_estado}
-                </MenuItem>
-              ))}
-            </TextField>
-            {(filtroFecha || filtroEstado) && (
-              <button
-                type="button"
-                className="pedidos-limpiar"
-                onClick={() => {
-                  setFiltroFecha('');
-                  setFiltroEstado('');
-                }}
-              >
-                Limpiar filtros
-              </button>
-            )}
+            <div className="pedidos-filtros-fecha">
+              <CampoFecha
+                size="small"
+                label="Filtrar por fecha"
+                value={filtroFecha}
+                onChange={(e) => setFiltroFecha(e.target.value)}
+              />
+              {(filtroFecha || filtroEstado) && (
+                <button
+                  type="button"
+                  className="pedidos-limpiar"
+                  onClick={() => {
+                    setFiltroFecha('');
+                    setFiltroEstado('');
+                  }}
+                >
+                  Limpiar filtros
+                </button>
+              )}
+            </div>
           </div>
         )}
 

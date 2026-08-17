@@ -11,10 +11,6 @@
   flex-wrap: wrap;
 }
 
-.cocina-filtro {
-  min-width: 230px;
-}
-
 .cocina-leyenda {
   display: flex;
   align-items: center;

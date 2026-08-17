@@ -8,6 +8,7 @@ import { TextField, Button } from '@mui/material';
 import { authService } from '../services/api';
 import { extraerErrorAPI } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
+import CampoContrasena from '../components/CampoContrasena';
 import './AuthPages.css';
 
 const schema = yup.object({
@@ -138,9 +139,8 @@ function RegistroPage() {
             {...register('telefono')}
           />
           <div className="auth-fila">
-            <TextField
+            <CampoContrasena
               label="Contraseña"
-              type="password"
               fullWidth
               autoComplete="new-password"
               error={Boolean(errors.contrasena)}
@@ -150,9 +150,8 @@ function RegistroPage() {
               }
               {...register('contrasena')}
             />
-            <TextField
+            <CampoContrasena
               label="Confirmar contraseña"
-              type="password"
               fullWidth
               autoComplete="new-password"
               error={Boolean(errors.confirmacion)}

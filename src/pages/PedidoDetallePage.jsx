@@ -13,6 +13,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import './PedidosPage.css';
 import './PedidoDetallePage.css';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 
 
 const claseEstado = (nombre) =>
@@ -213,7 +214,7 @@ function PedidoDetallePage() {
               <div className="factura-cupones-lista">
                 {pedido.cupones.map((cupon) => (
                   <span key={cupon.id_cupon} className="factura-cupon-chip">
-                    🎟️ {cupon.codigo} <small>({cupon.nombre})</small>
+                    <ConfirmationNumberIcon fontSize="small" /> {cupon.codigo} <small>({cupon.nombre})</small>
                   </span>
                 ))}
               </div>

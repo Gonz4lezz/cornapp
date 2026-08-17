@@ -7,8 +7,13 @@
  */
 class UsuarioController
 {
-    // Roles que el administrador puede crear desde el mantenimiento
-    const ROLES_PERSONAL = ['Encargado', 'Cocina', 'Administrador'];
+    // Roles que el administrador puede asignar. El enunciado define un único
+    // administrador, así que desde aquí no se puede crear otro.
+    const ROLES_ASIGNABLES = ['Encargado', 'Cocina'];
+
+    // Cuentas cuyo rol no se cambia: un cliente siempre es cliente y el
+    // administrador conserva el suyo para que el sistema no quede sin uno.
+    const ROLES_FIJOS = ['Cliente', 'Administrador'];
 
     private $model;
     private $response;
@@ -78,16 +83,17 @@ class UsuarioController
     // POST /UsuarioController/update
     public function update()
     {
-        $autenticado = Auth::requerir(['Administrador']);
+        Auth::requerir(['Administrador']);
         $data = $this->parsePayload();
         $id = intval($data['id_usuario'] ?? 0);
 
-        if ($id <= 0 || !$this->model->getById($id)) {
+        $actual = $id > 0 ? $this->model->getById($id) : null;
+        if (!$actual) {
             $this->response->status(404)->toJSON(null, 'Usuario no encontrado');
             return;
         }
 
-        $errores = $this->validar($data, false);
+        $errores = $this->validar($data, false, $actual);
         if (!empty($errores)) {
             $this->response->status(422)->toJSON(['errores' => $errores], 'Datos inválidos');
             return;
@@ -98,14 +104,6 @@ class UsuarioController
                 'mensaje' => 'Ya existe otra cuenta con ese correo',
             ], 'Correo duplicado');
             return;
-        }
-        // Evita que el administrador se quite a sí mismo su propio rol
-        if ($id === intval($autenticado->id_usuario)) {
-            $actual = $this->model->getById($id);
-            if (intval($data['id_rol']) !== intval($actual->id_rol)) {
-                $this->response->status(409)->toJSON(null, 'No puede cambiar su propio rol');
-                return;
-            }
         }
 
         $this->model->update($id, $data);
@@ -151,7 +149,7 @@ class UsuarioController
         return $json ? (array) $json : [];
     }
 
-    private function validar($data, $esNuevo)
+    private function validar($data, $esNuevo, $actual = null)
     {
         $errores = [];
 
@@ -168,16 +166,31 @@ class UsuarioController
             $errores['telefono'] = 'El teléfono no tiene un formato válido';
         }
 
-        // El rol debe existir y estar entre los que el administrador gestiona
         $idRol = intval($data['id_rol'] ?? 0);
-        $rolValido = false;
-        foreach ($this->model->getRoles() as $rol) {
-            if (intval($rol->id_rol) === $idRol && in_array($rol->nombre, self::ROLES_PERSONAL, true)) {
-                $rolValido = true;
+
+        if ($actual !== null && in_array($actual->rol, self::ROLES_FIJOS, true)) {
+            // La cuenta conserva su rol; solo se editan sus demás datos
+            if ($idRol !== intval($actual->id_rol)) {
+                $errores['id_rol'] = $actual->rol === 'Cliente'
+                    ? 'La cuenta de un cliente siempre conserva el rol Cliente'
+                    : 'El rol de administrador no se puede cambiar';
             }
-        }
-        if (!$rolValido) {
-            $errores['id_rol'] = 'Seleccione un rol válido (Encargado, Cocina o Administrador)';
+        } else {
+            // El rol debe existir y estar entre los que el administrador asigna
+            $rolValido = false;
+            $roles = $this->model->getRoles();
+            if (!is_array($roles) && !(is_object($roles) && $roles instanceof Traversable)) {
+                $roles = [];
+            }
+            foreach ($roles as $rol) {
+                if (intval($rol->id_rol) === $idRol
+                    && in_array($rol->nombre, self::ROLES_ASIGNABLES, true)) {
+                    $rolValido = true;
+                }
+            }
+            if (!$rolValido) {
+                $errores['id_rol'] = 'Seleccione un rol válido (Encargado o Cocina)';
+            }
         }
 
         // La contraseña es obligatoria al crear; al editar solo si la escriben

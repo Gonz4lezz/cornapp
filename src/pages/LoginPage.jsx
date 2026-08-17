@@ -8,6 +8,7 @@ import { TextField, Button, Divider } from '@mui/material';
 import { authService, GOOGLE_CLIENT_ID } from '../services/api';
 import { extraerErrorAPI } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
+import CampoContrasena from '../components/CampoContrasena';
 import './AuthPages.css';
 
 const schema = yup.object({
@@ -139,9 +140,8 @@ function LoginPage() {
             helperText={errors.correo?.message}
             {...register('correo')}
           />
-          <TextField
+          <CampoContrasena
             label="Contraseña"
-            type="password"
             fullWidth
             autoComplete="current-password"
             error={Boolean(errors.contrasena)}
