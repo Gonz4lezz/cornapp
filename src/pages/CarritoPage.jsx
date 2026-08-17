@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -22,11 +22,18 @@ import {
 import { formatoMoneda, extraerErrorAPI } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
+import MapaDireccion from '../components/MapaDireccion';
 import './CarritoPage.css';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 
+// Los precios del catálogo ya incluyen el IVA: el impuesto no se suma al
+// total, se desglosa del precio con la fórmula monto * tasa / (1 + tasa).
 const TASA_IMPUESTO = 0.13;
+
+const impuestoIncluido = (montoConImpuesto) =>
+  Math.round(((montoConImpuesto * TASA_IMPUESTO) / (1 + TASA_IMPUESTO)) * 100) /
+  100;
 
 // Los selects vacíos llegan como '' y deben tratarse como "sin valor"
 const numeroOpcional = () =>
@@ -99,8 +106,13 @@ function CarritoPage() {
 
   const [catalogos, setCatalogos] = useState({
     metodosPago: [],
-    tarifasEnvio: [],
+    restaurante: null,
+    distanciaMaximaKm: 0,
   });
+  // Punto marcado en el mapa y su cotización de envío (la calcula el servidor)
+  const [ubicacion, setUbicacion] = useState(null);
+  const [cotizacion, setCotizacion] = useState(null);
+  const [cotizando, setCotizando] = useState(false);
   const [clientes, setClientes] = useState([]);
   const [tipoCambio, setTipoCambio] = useState(null);
   const [codigoCupon, setCodigoCupon] = useState('');
@@ -117,7 +129,8 @@ function CarritoPage() {
       .then(({ data }) =>
         setCatalogos({
           metodosPago: data.metodosPago ?? [],
-          tarifasEnvio: data.tarifasEnvio ?? [],
+          restaurante: data.restaurante ?? null,
+          distanciaMaximaKm: Number(data.distanciaMaximaKm ?? 0),
         }),
       )
       .catch(() =>
@@ -145,14 +158,15 @@ function CarritoPage() {
         const cantidad = Number(item.cantidad);
         const precioTotal = Math.round(precioUnitario * cantidad * 100) / 100;
         const descuento = descuentoDeLinea(item, cupones, precioTotal);
-        const impuesto =
-          Math.round((precioTotal - descuento) * TASA_IMPUESTO * 100) / 100;
+        const neto = Math.round((precioTotal - descuento) * 100) / 100;
+        const impuesto = impuestoIncluido(neto);
         return {
           item,
           precioUnitario,
           cantidad,
           precioTotal,
           descuento,
+          neto,
           impuesto,
         };
       }),
@@ -160,10 +174,12 @@ function CarritoPage() {
   );
 
   const totales = useMemo(() => {
-    const subtotal = lineas.reduce((s, l) => s + l.precioTotal, 0);
+    const neto = lineas.reduce((s, l) => s + l.neto, 0);
     const descuento = lineas.reduce((s, l) => s + l.descuento, 0);
     const impuesto = lineas.reduce((s, l) => s + l.impuesto, 0);
-    return { subtotal, descuento, impuesto };
+    // Base gravable: lo cobrado menos el IVA que ya venía incluido
+    const subtotal = Math.round((neto - impuesto) * 100) / 100;
+    return { neto, subtotal, descuento, impuesto };
   }, [lineas]);
 
   // ----- Formulario del encabezado y el pago -----
@@ -177,15 +193,11 @@ function CarritoPage() {
           .string()
           .oneOf(['recogida', 'domicilio'])
           .required('Seleccione el método de entrega'),
-        id_tarifa: numeroOpcional().when('tipo_entrega', {
-          is: 'domicilio',
-          then: (s) => s.required('Seleccione la zona de envío'),
-        }),
         direccion: yup.string().when('tipo_entrega', {
           is: 'domicilio',
           then: (s) =>
             s
-              .required('Indique la dirección de entrega')
+              .required('Marque la dirección de entrega en el mapa')
               .min(10, 'La dirección debe tener al menos 10 caracteres'),
           otherwise: (s) => s.optional(),
         }),
@@ -246,6 +258,7 @@ function CarritoPage() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: (values, context, options) =>
@@ -260,7 +273,6 @@ function CarritoPage() {
     defaultValues: {
       id_cliente: null,
       tipo_entrega: 'recogida',
-      id_tarifa: null,
       direccion: '',
       referencia: '',
       id_metodo: '',
@@ -273,7 +285,6 @@ function CarritoPage() {
   });
 
   const tipoEntrega = watch('tipo_entrega');
-  const idTarifa = watch('id_tarifa');
   const idMetodo = watch('id_metodo');
   const idClienteSeleccionado = watch('id_cliente');
   const efectivoRecibido = watch('efectivo_recibido');
@@ -300,19 +311,13 @@ function CarritoPage() {
     metodoSeleccionado && /efectivo/i.test(metodoSeleccionado.nombre),
   );
 
-  const tarifaSeleccionada = catalogos.tarifasEnvio.find(
-    (t) => Number(t.id_tarifa) === Number(idTarifa),
-  );
+  // El costo del envío lo cotiza el servidor con el punto marcado en el mapa
   const costoEnvio =
-    tipoEntrega === 'domicilio' && tarifaSeleccionada
-      ? Number(tarifaSeleccionada.tarifa_base)
+    tipoEntrega === 'domicilio' && cotizacion
+      ? Number(cotizacion.costo_envio)
       : 0;
 
-  const total =
-    Math.round(
-      (totales.subtotal - totales.descuento + totales.impuesto + costoEnvio) *
-        100,
-    ) / 100;
+  const total = Math.round((totales.neto + costoEnvio) * 100) / 100;
   const totalUSD =
     tipoCambio?.colones_por_dolar > 0
       ? total / Number(tipoCambio.colones_por_dolar)
@@ -331,6 +336,41 @@ function CarritoPage() {
     month: 'long',
     year: 'numeric',
   }).format(new Date());
+
+  // ----- Dirección de entrega en el mapa -----
+  // Al marcar un punto se completa la dirección y se le pide al servidor
+  // el costo del envío para esa distancia.
+  const alMarcarUbicacion = useCallback(
+    async ({ latitud, longitud, direccion, buscandoDireccion }) => {
+      setUbicacion({ latitud, longitud });
+      if (direccion) {
+        setValue('direccion', direccion, { shouldValidate: true });
+      }
+      if (buscandoDireccion) return;
+
+      setCotizando(true);
+      try {
+        const { data } = await pedidoService.cotizarEnvio(latitud, longitud);
+        setCotizacion(data);
+      } catch (error) {
+        setCotizacion(null);
+        toast.error(
+          extraerErrorAPI(error, 'No se pudo calcular el costo del envío'),
+        );
+      } finally {
+        setCotizando(false);
+      }
+    },
+    [setValue],
+  );
+
+  // Al volver a retiro en tienda se descarta la dirección marcada
+  useEffect(() => {
+    if (tipoEntrega !== 'domicilio') {
+      setUbicacion(null);
+      setCotizacion(null);
+    }
+  }, [tipoEntrega]);
 
   // ----- Acciones sobre las líneas -----
   const cambiarCantidad = async (linea, valor) => {
@@ -387,6 +427,12 @@ function CarritoPage() {
 
   // ----- Registro del pedido -----
   const onSubmit = async (valores) => {
+    if (valores.tipo_entrega === 'domicilio' && (!ubicacion || !cotizacion)) {
+      toast.error(
+        'Marque la dirección de entrega en el mapa antes de continuar',
+      );
+      return;
+    }
     setRegistrando(true);
     try {
       const payload = {
@@ -395,9 +441,10 @@ function CarritoPage() {
       };
       if (esPersonal) payload.id_cliente = Number(valores.id_cliente);
       if (valores.tipo_entrega === 'domicilio') {
-        payload.id_tarifa = Number(valores.id_tarifa);
         payload.direccion = valores.direccion;
         payload.referencia = valores.referencia;
+        payload.latitud = ubicacion.latitud;
+        payload.longitud = ubicacion.longitud;
       }
       if (esTarjeta) {
         payload.tarjeta = {
@@ -437,8 +484,8 @@ function CarritoPage() {
           <h1>Tu carrito</h1>
         </div>
         <div className="carrito-vacio">
-          <span className="carrito-vacio-icono" >
-            <ProductionQuantityLimitsIcon fontSize="large"/>
+          <span className="carrito-vacio-icono">
+            <ProductionQuantityLimitsIcon fontSize="large" />
           </span>
           <h2>El carrito está vacío</h2>
           <p>Agrega productos o combos del menú para armar tu pedido.</p>
@@ -533,9 +580,7 @@ function CarritoPage() {
                     <span className="factura-valor">
                       {usuario.nombre} {usuario.apellido}
                     </span>
-                    <span className="factura-subvalor">
-                      Sesión actual
-                    </span>
+                    <span className="factura-subvalor">Sesión actual</span>
                   </div>
                 </>
               )}
@@ -565,34 +610,49 @@ function CarritoPage() {
 
             {tipoEntrega === 'domicilio' && (
               <div className="factura-domicilio">
-                <Controller
-                  name="id_tarifa"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      select
-                      size="small"
-                      label="Zona de envío"
-                      value={field.value ?? ''}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      error={Boolean(errors.id_tarifa)}
-                      helperText={errors.id_tarifa?.message}
-                      className="factura-domicilio-zona"
-                    >
-                      {catalogos.tarifasEnvio.map((t) => (
-                        <MenuItem key={t.id_tarifa} value={t.id_tarifa}>
-                          {t.nombre} — {formatoMoneda(t.tarifa_base)}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                <div className="factura-domicilio-mapa">
+                  <MapaDireccion
+                    restaurante={catalogos.restaurante}
+                    punto={ubicacion}
+                    onCambio={alMarcarUbicacion}
+                    alcanceKm={catalogos.distanciaMaximaKm}
+                  />
+                </div>
+
+                <aside className="factura-domicilio-costo">
+                  <span className="factura-etiqueta">Costo del envío</span>
+                  {cotizando ? (
+                    <p className="factura-domicilio-cargando">Calculando…</p>
+                  ) : cotizacion ? (
+                    <>
+                      <strong className="factura-domicilio-monto">
+                        {formatoMoneda(cotizacion.costo_envio)}
+                      </strong>
+                      <p className="factura-domicilio-detalle">
+                        {cotizacion.tarifa} · {cotizacion.distancia_km} km desde
+                        el local
+                      </p>
+                      <p className="factura-domicilio-detalle">
+                        Llega aproximadamente en {cotizacion.duracion_min} min
+                      </p>
+                    </>
+                  ) : (
+                    <p className="factura-domicilio-cargando">
+                      Marque la dirección en el mapa para calcular el costo.
+                    </p>
                   )}
-                />
+                </aside>
+
                 <TextField
                   size="small"
                   label="Dirección de entrega"
                   fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
                   error={Boolean(errors.direccion)}
-                  helperText={errors.direccion?.message}
+                  helperText={
+                    errors.direccion?.message ||
+                    'Se completa sola al marcar el punto; puede ajustarla'
+                  }
                   {...register('direccion')}
                 />
                 <TextField
@@ -630,9 +690,7 @@ function CarritoPage() {
                             alt={linea.item.nombre}
                           />
                         ) : (
-                          <span className="factura-articulo-placeholder">
-                            
-                          </span>
+                          <span className="factura-articulo-placeholder"></span>
                         )}
                         <div>
                           <span className="factura-articulo-nombre">
@@ -732,7 +790,7 @@ function CarritoPage() {
               <div className="factura-cupones-lista">
                 {cupones.map((cupon) => (
                   <span key={cupon.id_cupon} className="factura-cupon-chip">
-                     {cupon.codigo}
+                    {cupon.codigo}
                     <small>({cupon.nombre_objetivo})</small>
                     <button
                       type="button"
@@ -769,9 +827,7 @@ function CarritoPage() {
             <div className="resumen-fila">
               <span>Envío</span>
               <span>
-                {tarifaSeleccionada
-                  ? formatoMoneda(costoEnvio)
-                  : 'Seleccione la zona'}
+                {cotizacion ? formatoMoneda(costoEnvio) : 'Marque la dirección'}
               </span>
             </div>
           )}
