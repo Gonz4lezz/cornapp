@@ -12,7 +12,6 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
-
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -23,12 +22,15 @@
     "@mui/styled-engine-sc": "^9.1.1",
     "axios": "^1.18.0",
     "jwt-decode": "^4.0.0",
+    "leaflet": "^1.9.4",
     "nodemon": "^3.1.14",
     "prop-types": "^15.8.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.79.0",
     "react-hot-toast": "^2.6.0",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^3.10.1",
     "styled-components": "^6.4.2",
     "yup": "^1.7.1"
   },

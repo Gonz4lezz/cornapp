@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE = 'http://localhost:81/cornapp';
+export const API_BASE = 'http://localhost:81/cornapp-project';
 
 // Client ID de Google para el inicio de sesión (Google Identity Services)
 export const GOOGLE_CLIENT_ID =
@@ -133,8 +133,31 @@ export const carritoService = {
   vaciar: () => api.post('/CarritoController/vaciar'),
 };
 
+export const usuarioService = {
+  getAll: (idRol = null) =>
+    api.get('/UsuarioController', { params: idRol ? { rol: idRol } : {} }),
+  getRoles: () => api.get('/UsuarioController/roles'),
+  getById: (id) => api.get(`/UsuarioController/${id}`),
+  create: (payload) => api.post('/UsuarioController/create', payload),
+  update: (payload) => api.post('/UsuarioController/update', payload),
+  desactivar: (id) =>
+    api.post('/UsuarioController/desactivar', { id_usuario: id }),
+  activar: (id) => api.post('/UsuarioController/activar', { id_usuario: id }),
+};
+
+export const dashboardService = {
+  get: () => api.get('/DashboardController'),
+};
+
 export const pedidoService = {
   getCatalogos: () => api.get('/PedidoController/catalogos'),
+  cotizarEnvio: (latitud, longitud) =>
+    api.post('/PedidoController/cotizarEnvio', { latitud, longitud }),
+  despachar: (idPedido, repartidor) =>
+    api.post('/PedidoController/despachar', {
+      id_pedido: idPedido,
+      repartidor,
+    }),
   getHistorial: (filtros = {}) =>
     api.get('/PedidoController/historial', { params: filtros }),
   getById: (id) => api.get(`/PedidoController/${id}`),
