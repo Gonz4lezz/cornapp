@@ -177,241 +177,249 @@ function PedidoDetallePage() {
       </div>
 
       <div className="page-content pedido-detalle-layout">
-        <div className="pedido-factura">
-          {/* ---------- Encabezado ---------- */}
-          <div className="pedido-factura-cabecera">
-            <div>
-              <span className="pedido-factura-marca">CornApp</span>
-              <span className="pedido-factura-numero">
-                Factura · {pedido.numero_pedido}
-              </span>
-            </div>
-            <span className={claseEstado(pedido.nombre_estado)}>
-              {pedido.nombre_estado}
-            </span>
-          </div>
-
-          <div className="pedido-factura-datos">
-            <div className="factura-campo">
-              <span className="factura-etiqueta">Fecha</span>
-              <span className="factura-valor">
-                {formatoFechaHora(pedido.creado_en)}
-              </span>
-            </div>
-            <div className="factura-campo">
-              <span className="factura-etiqueta">Cliente</span>
-              <span className="factura-valor">
-                {pedido.nombre_cliente} {pedido.apellido_cliente}
-              </span>
-              <span className="factura-subvalor">{pedido.correo_cliente}</span>
-            </div>
-            <div className="factura-campo">
-              <span className="factura-etiqueta">Encargado</span>
-              <span className="factura-valor">
-                {pedido.nombre_encargado
-                  ? `${pedido.nombre_encargado} ${pedido.apellido_encargado}`
-                  : 'Pedido en línea'}
-              </span>
-            </div>
-            <div className="factura-campo">
-              <span className="factura-etiqueta">Método de entrega</span>
-              <span className="factura-valor">
-                {pedido.tipo_entrega === 'domicilio'
-                  ? 'Entrega a domicilio'
-                  : 'Retiro en tienda'}
-              </span>
-              {pedido.envio && (
-                <span className="factura-subvalor">
-                  <LocationOnIcon fontSize="small" />{' '}
-                  {pedido.envio.direccion_texto}
+        {/* Columna izquierda: la factura y, debajo, el mapa del envío */}
+        <div className="pedido-detalle-principal">
+          <div className="pedido-factura">
+            {/* ---------- Encabezado ---------- */}
+            <div className="pedido-factura-cabecera">
+              <div>
+                <span className="pedido-factura-marca">CornApp</span>
+                <span className="pedido-factura-numero">
+                  Factura · {pedido.numero_pedido}
                 </span>
-              )}
+              </div>
+              <span className={claseEstado(pedido.nombre_estado)}>
+                {pedido.nombre_estado}
+              </span>
             </div>
-            <div className="factura-campo">
-              <span className="factura-etiqueta">Método de pago</span>
-              <span className="factura-valor">{pedido.metodo_pago ?? '—'}</span>
-              {pedido.ultimos_cuatro && (
-                <span className="factura-subvalor">
-                  Tarjeta terminada en {pedido.ultimos_cuatro}
-                </span>
-              )}
-              {pedido.efectivo_recibido != null && (
-                <span className="factura-subvalor">
-                  Pagó con {formatoMoneda(pedido.efectivo_recibido)} · vuelto{' '}
-                  {formatoMoneda(pedido.vuelto)}
-                </span>
-              )}
-            </div>
-          </div>
 
-          {/* ---------- Detalle ---------- */}
-          <div className="factura-detalle">
-            <table className="factura-tabla">
-              <thead>
-                <tr>
-                  <th>Artículo</th>
-                  <th>Precio</th>
-                  <th>Cantidad</th>
-                  <th>Subtotal</th>
-                  <th>Descuento</th>
-                  <th>IVA (13%)</th>
-                  <th>Observaciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pedido.detalles.map((detalle) => (
-                  <tr key={detalle.id_detalle}>
-                    <td>
-                      <span className="factura-articulo-nombre">
-                        {detalle.nombre}
-                      </span>
-                      <span
-                        className={`factura-articulo-tipo tipo-${detalle.tipo}`}
-                      >
-                        {detalle.tipo === 'combo' ? 'Combo' : 'Producto'}
-                      </span>
-                    </td>
-                    <td>{formatoMoneda(detalle.precio_unitario)}</td>
-                    <td>{detalle.cantidad}</td>
-                    <td>{formatoMoneda(detalle.precio_total)}</td>
-                    <td className="factura-descuento">
-                      {Number(detalle.monto_descuento) > 0
-                        ? `−${formatoMoneda(detalle.monto_descuento)}`
-                        : '—'}
-                    </td>
-                    <td>{formatoMoneda(detalle.monto_impuesto)}</td>
-                    <td className="pedido-observaciones">
-                      {detalle.observaciones || '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {pedido.cupones.length > 0 && (
-            <div className="pedido-cupones">
-              <span className="factura-etiqueta">Cupones aplicados</span>
-              <div className="factura-cupones-lista">
-                {pedido.cupones.map((cupon) => (
-                  <span key={cupon.id_cupon} className="factura-cupon-chip">
-                    <ConfirmationNumberIcon fontSize="small" /> {cupon.codigo} <small>({cupon.nombre})</small>
+            <div className="pedido-factura-datos">
+              <div className="factura-campo">
+                <span className="factura-etiqueta">Fecha</span>
+                <span className="factura-valor">
+                  {formatoFechaHora(pedido.creado_en)}
+                </span>
+              </div>
+              <div className="factura-campo">
+                <span className="factura-etiqueta">Cliente</span>
+                <span className="factura-valor">
+                  {pedido.nombre_cliente} {pedido.apellido_cliente}
+                </span>
+                <span className="factura-subvalor">
+                  {pedido.correo_cliente}
+                </span>
+              </div>
+              <div className="factura-campo">
+                <span className="factura-etiqueta">Encargado</span>
+                <span className="factura-valor">
+                  {pedido.nombre_encargado
+                    ? `${pedido.nombre_encargado} ${pedido.apellido_encargado}`
+                    : 'Pedido en línea'}
+                </span>
+              </div>
+              <div className="factura-campo">
+                <span className="factura-etiqueta">Método de entrega</span>
+                <span className="factura-valor">
+                  {pedido.tipo_entrega === 'domicilio'
+                    ? 'Entrega a domicilio'
+                    : 'Retiro en tienda'}
+                </span>
+                {pedido.envio && (
+                  <span className="factura-subvalor">
+                    <LocationOnIcon fontSize="small" />{' '}
+                    {pedido.envio.direccion_texto}
                   </span>
-                ))}
+                )}
+              </div>
+              <div className="factura-campo">
+                <span className="factura-etiqueta">Método de pago</span>
+                <span className="factura-valor">
+                  {pedido.metodo_pago ?? '—'}
+                </span>
+                {pedido.ultimos_cuatro && (
+                  <span className="factura-subvalor">
+                    Tarjeta terminada en {pedido.ultimos_cuatro}
+                  </span>
+                )}
+                {pedido.efectivo_recibido != null && (
+                  <span className="factura-subvalor">
+                    Pagó con {formatoMoneda(pedido.efectivo_recibido)} · vuelto{' '}
+                    {formatoMoneda(pedido.vuelto)}
+                  </span>
+                )}
               </div>
             </div>
-          )}
 
-          {/* ---------- Totales ---------- */}
-          <div className="pedido-totales">
-            <div className="resumen-fila">
-              <span>Subtotal</span>
-              <span>{formatoMoneda(pedido.subtotal)}</span>
+            {/* ---------- Detalle ---------- */}
+            <div className="factura-detalle">
+              <table className="factura-tabla">
+                <thead>
+                  <tr>
+                    <th>Artículo</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Descuento</th>
+                    <th>IVA (13%)</th>
+                    <th>Observaciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pedido.detalles.map((detalle) => (
+                    <tr key={detalle.id_detalle}>
+                      <td>
+                        <span className="factura-articulo-nombre">
+                          {detalle.nombre}
+                        </span>
+                        <span
+                          className={`factura-articulo-tipo tipo-${detalle.tipo}`}
+                        >
+                          {detalle.tipo === 'combo' ? 'Combo' : 'Producto'}
+                        </span>
+                      </td>
+                      <td>{formatoMoneda(detalle.precio_unitario)}</td>
+                      <td>{detalle.cantidad}</td>
+                      <td>{formatoMoneda(detalle.precio_total)}</td>
+                      <td className="factura-descuento">
+                        {Number(detalle.monto_descuento) > 0
+                          ? `−${formatoMoneda(detalle.monto_descuento)}`
+                          : '—'}
+                      </td>
+                      <td>{formatoMoneda(detalle.monto_impuesto)}</td>
+                      <td className="pedido-observaciones">
+                        {detalle.observaciones || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            {Number(pedido.monto_descuento) > 0 && (
-              <div className="resumen-fila resumen-descuento">
-                <span>Descuento</span>
-                <span>−{formatoMoneda(pedido.monto_descuento)}</span>
+
+            {pedido.cupones.length > 0 && (
+              <div className="pedido-cupones">
+                <span className="factura-etiqueta">Cupones aplicados</span>
+                <div className="factura-cupones-lista">
+                  {pedido.cupones.map((cupon) => (
+                    <span key={cupon.id_cupon} className="factura-cupon-chip">
+                      <ConfirmationNumberIcon fontSize="small" /> {cupon.codigo}{' '}
+                      <small>({cupon.nombre})</small>
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
-            <div className="resumen-fila">
-              <span>IVA (13%)</span>
-              <span>{formatoMoneda(pedido.monto_impuesto)}</span>
-            </div>
-            {Number(pedido.costo_envio) > 0 && (
+
+            {/* ---------- Totales ---------- */}
+            <div className="pedido-totales">
               <div className="resumen-fila">
-                <span>Envío</span>
-                <span>{formatoMoneda(pedido.costo_envio)}</span>
+                <span>Subtotal</span>
+                <span>{formatoMoneda(pedido.subtotal)}</span>
               </div>
-            )}
-            <div className="resumen-fila resumen-total">
-              <span>Total</span>
-              <span>{formatoMoneda(pedido.monto_total)}</span>
-            </div>
-            {totalUSD != null && (
-              <div className="resumen-usd">
-                ≈{' '}
-                {new Intl.NumberFormat('es-CR', {
-                  style: 'currency',
-                  currency: 'USD',
-                }).format(totalUSD)}
-              </div>
-            )}
-          </div>
-
-          {/* ---------- Exportar la factura ---------- */}
-          <div className="pedido-exportar">
-            <Button
-              variant="outlined"
-              className="pedido-exportar-boton"
-              startIcon={<PictureAsPdfIcon />}
-              disabled={descargando}
-              onClick={descargarFactura}
-            >
-              {descargando ? 'Generando…' : 'Descargar factura (PDF)'}
-            </Button>
-          </div>
-
-          {/* ---------- Acciones del encargado ---------- */}
-          {esPersonal && hayAcciones && (
-            <div className="pedido-acciones">
-              {estadoActual === ESTADO_REGISTRADO && (
-                <Button
-                  variant="contained"
-                  className="pedido-accion-aceptar"
-                  onClick={() => setConfirmacion('aceptar')}
-                >
-                  Aceptar pedido y enviar a cocina
-                </Button>
+              {Number(pedido.monto_descuento) > 0 && (
+                <div className="resumen-fila resumen-descuento">
+                  <span>Descuento</span>
+                  <span>−{formatoMoneda(pedido.monto_descuento)}</span>
+                </div>
               )}
+              <div className="resumen-fila">
+                <span>IVA (13%)</span>
+                <span>{formatoMoneda(pedido.monto_impuesto)}</span>
+              </div>
+              {Number(pedido.costo_envio) > 0 && (
+                <div className="resumen-fila">
+                  <span>Envío</span>
+                  <span>{formatoMoneda(pedido.costo_envio)}</span>
+                </div>
+              )}
+              <div className="resumen-fila resumen-total">
+                <span>Total</span>
+                <span>{formatoMoneda(pedido.monto_total)}</span>
+              </div>
+              {totalUSD != null && (
+                <div className="resumen-usd">
+                  ≈{' '}
+                  {new Intl.NumberFormat('es-CR', {
+                    style: 'currency',
+                    currency: 'USD',
+                  }).format(totalUSD)}
+                </div>
+              )}
+            </div>
 
-              {/* Un pedido a domicilio primero sale del local */}
-              {estadoActual === ESTADO_LISTO && esDomicilio && (
-                <>
-                  <TextField
-                    size="small"
-                    label="Repartidor asignado"
-                    value={repartidor}
-                    onChange={(e) => setRepartidor(e.target.value)}
-                    className="pedido-accion-repartidor"
-                  />
+            {/* ---------- Exportar la factura ---------- */}
+            <div className="pedido-exportar">
+              <Button
+                variant="outlined"
+                className="pedido-exportar-boton"
+                startIcon={<PictureAsPdfIcon />}
+                disabled={descargando}
+                onClick={descargarFactura}
+              >
+                {descargando ? 'Generando…' : 'Descargar factura (PDF)'}
+              </Button>
+            </div>
+
+            {/* ---------- Acciones del encargado ---------- */}
+            {esPersonal && hayAcciones && (
+              <div className="pedido-acciones">
+                {estadoActual === ESTADO_REGISTRADO && (
                   <Button
                     variant="contained"
                     className="pedido-accion-aceptar"
-                    disabled={repartidor.trim().length < 3}
-                    onClick={() => setConfirmacion('despachar')}
+                    onClick={() => setConfirmacion('aceptar')}
                   >
-                    Despachar pedido
+                    Aceptar pedido y enviar a cocina
                   </Button>
-                </>
-              )}
+                )}
 
-              {(estadoActual === ESTADO_EN_CAMINO ||
-                (estadoActual === ESTADO_LISTO && !esDomicilio)) && (
-                <Button
-                  variant="contained"
-                  className="pedido-accion-entregar"
-                  onClick={() => setConfirmacion('entregar')}
-                >
-                  Marcar como entregado
-                </Button>
-              )}
-            </div>
+                {/* Un pedido a domicilio primero sale del local */}
+                {estadoActual === ESTADO_LISTO && esDomicilio && (
+                  <>
+                    <TextField
+                      size="small"
+                      label="Repartidor asignado"
+                      value={repartidor}
+                      onChange={(e) => setRepartidor(e.target.value)}
+                      className="pedido-accion-repartidor"
+                    />
+                    <Button
+                      variant="contained"
+                      className="pedido-accion-aceptar"
+                      disabled={repartidor.trim().length < 3}
+                      onClick={() => setConfirmacion('despachar')}
+                    >
+                      Despachar pedido
+                    </Button>
+                  </>
+                )}
+
+                {(estadoActual === ESTADO_EN_CAMINO ||
+                  (estadoActual === ESTADO_LISTO && !esDomicilio)) && (
+                  <Button
+                    variant="contained"
+                    className="pedido-accion-entregar"
+                    onClick={() => setConfirmacion('entregar')}
+                  >
+                    Marcar como entregado
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ---------- Seguimiento del envío en el mapa ---------- */}
+          {destino && restaurante && (
+            <section className="pedido-mapa">
+              <h3>Seguimiento del envío</h3>
+              <MapaSeguimiento
+                restaurante={restaurante}
+                destino={destino}
+                envio={pedido.envio}
+                entregado={estadoActual === ESTADO_ENTREGADO}
+              />
+            </section>
           )}
         </div>
-
-        {/* ---------- Seguimiento del envío en el mapa ---------- */}
-        {destino && restaurante && (
-          <section className="pedido-mapa">
-            <h3>Seguimiento del envío</h3>
-            <MapaSeguimiento
-              restaurante={restaurante}
-              destino={destino}
-              envio={pedido.envio}
-              entregado={estadoActual === ESTADO_ENTREGADO}
-            />
-          </section>
-        )}
 
         {/* ---------- Seguimiento ---------- */}
         <aside className="pedido-seguimiento">

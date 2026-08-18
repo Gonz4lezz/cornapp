@@ -126,4 +126,6 @@
 .leaflet-container {
   font-family: 'Poppins', system-ui, sans-serif;
   font-size: 0.75rem;
+  position: relative;
+  z-index: 0;
 }

@@ -4,6 +4,12 @@
   gap: 24px;
   align-items: start;
 }
+.pedido-detalle-principal {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
 
 .pedido-factura {
   background: var(--bg-card);
@@ -188,7 +194,6 @@
 
 /* Mapa de seguimiento del envío a domicilio */
 .pedido-mapa {
-  grid-column: 1 / -1;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
