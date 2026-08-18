@@ -204,3 +204,54 @@
 .pedido-accion-repartidor {
   min-width: 220px;
 }
+
+/* Mapa de seguimiento del envío a domicilio */
+.pedido-mapa {
+  grid-column: 1 / -1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.pedido-mapa h3 {
+  font-size: 1rem;
+  margin-bottom: 14px;
+}
+
+.pedido-accion-repartidor {
+  min-width: 220px;
+}
+
+/* Descarga y envío de la factura */
+.pedido-exportar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px 24px 22px;
+  border-top: 2px dashed var(--border);
+}
+
+.pedido-exportar-boton.MuiButton-root {
+  border-radius: 10px;
+  text-transform: none;
+  font-weight: 600;
+  font-family: 'Poppins', system-ui, sans-serif;
+  color: var(--secondary-dark);
+  border-color: var(--secondary);
+}
+
+.pedido-exportar-boton.MuiButton-root:hover {
+  background: rgba(255, 142, 66, 0.1);
+  border-color: var(--secondary-dark);
+}
+
+.pedido-exportar-nota {
+  flex-basis: 100%;
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
