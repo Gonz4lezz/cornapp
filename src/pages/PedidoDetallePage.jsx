@@ -1,20 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Button } from '@mui/material';
-import { pedidoService, tipoCambioService } from '../services/api';
+import { Button, TextField } from '@mui/material';
+import {
+  facturaService,
+  pedidoService,
+  tipoCambioService,
+} from '../services/api';
 import {
   formatoMoneda,
   formatoFechaHora,
   extraerErrorAPI,
+  extraerErrorBlob,
 } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
+import MapaSeguimiento from '../components/MapaSeguimiento';
 import './PedidosPage.css';
 import './PedidoDetallePage.css';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import EmailIcon from '@mui/icons-material/Email';
 
 const claseEstado = (nombre) =>
   `pedido-estado pedido-estado-${String(nombre)
@@ -32,8 +38,13 @@ function PedidoDetallePage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [tipoCambio, setTipoCambio] = useState(null);
-  const [confirmacion, setConfirmacion] = useState(null); // 'aceptar' | 'entregar'
+  // 'aceptar' | 'despachar' | 'entregar' | 'correo'
+  const [confirmacion, setConfirmacion] = useState(null);
+  const [restaurante, setRestaurante] = useState(null);
+  const [repartidor, setRepartidor] = useState('');
   const [procesando, setProcesando] = useState(false);
+  // null | 'descargando' | 'enviando': bloquea los botones de la factura
+  const [factura, setFactura] = useState(null);
 
   const cargar = useCallback(async () => {
     try {
@@ -53,21 +64,70 @@ function PedidoDetallePage() {
       .get()
       .then(({ data }) => setTipoCambio(data))
       .catch(() => setTipoCambio(null));
+    pedidoService
+      .getCatalogos()
+      .then(({ data }) => setRestaurante(data.restaurante ?? null))
+      .catch(() => setRestaurante(null));
   }, [cargar]);
 
+  // Descarga el PDF que arma el servidor y lo guarda en el equipo
+  const descargarFactura = async () => {
+    setFactura('descargando');
+    try {
+      const { data } = await facturaService.descargar(pedido.id_pedido);
+      const url = URL.createObjectURL(
+        new Blob([data], { type: 'application/pdf' }),
+      );
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = `FACTURA-${pedido.numero_pedido}.pdf`;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      // Se libera la memoria del blob una vez iniciada la descarga
+      URL.revokeObjectURL(url);
+      toast.success('Factura descargada');
+    } catch (err) {
+      toast.error(await extraerErrorBlob(err, 'No se pudo generar la factura'));
+    } finally {
+      setFactura(null);
+    }
+  };
+
+  const enviarFactura = async () => {
+    setFactura('enviando');
+    setConfirmacion(null);
+    try {
+      const { data } = await facturaService.enviar(pedido.id_pedido);
+      toast.success(`Factura enviada a ${data.correo}`);
+    } catch (err) {
+      toast.error(extraerErrorAPI(err, 'No se pudo enviar la factura'));
+    } finally {
+      setFactura(null);
+    }
+  };
+
   const ejecutarAccion = async () => {
+    if (confirmacion === 'correo') {
+      enviarFactura();
+      return;
+    }
     setProcesando(true);
     try {
-      const { data } =
-        confirmacion === 'aceptar'
-          ? await pedidoService.aceptar(pedido.id_pedido)
-          : await pedidoService.entregar(pedido.id_pedido);
+      const acciones = {
+        aceptar: () => pedidoService.aceptar(pedido.id_pedido),
+        despachar: () => pedidoService.despachar(pedido.id_pedido, repartidor),
+        entregar: () => pedidoService.entregar(pedido.id_pedido),
+      };
+      const mensajes = {
+        aceptar: 'Pedido aceptado y enviado a cocina',
+        despachar: 'Pedido despachado, ya se puede seguir en el mapa',
+        entregar: 'Pedido marcado como entregado',
+      };
+      const { data } = await acciones[confirmacion]();
       setPedido(data);
-      toast.success(
-        confirmacion === 'aceptar'
-          ? 'Pedido aceptado y enviado a cocina'
-          : 'Pedido marcado como entregado',
-      );
+      setRepartidor('');
+      toast.success(mensajes[confirmacion]);
     } catch (err) {
       toast.error(extraerErrorAPI(err, 'No se pudo actualizar el pedido'));
     } finally {
@@ -85,6 +145,47 @@ function PedidoDetallePage() {
       ? Number(pedido.monto_total) / Number(tipoCambio.colones_por_dolar)
       : null;
   const estadoActual = Number(pedido.id_estado);
+  const ESTADO_REGISTRADO = 1;
+  const ESTADO_LISTO = 4;
+  const ESTADO_EN_CAMINO = 5;
+  const ESTADO_ENTREGADO = 6;
+
+  const esDomicilio = pedido.tipo_entrega === 'domicilio';
+  // El mapa solo tiene sentido si el envío guardó las coordenadas del destino
+  const destino =
+    esDomicilio && pedido.envio?.latitud && pedido.envio?.longitud
+      ? {
+          latitud: Number(pedido.envio.latitud),
+          longitud: Number(pedido.envio.longitud),
+        }
+      : null;
+
+  // Estados en los que el encargado todavía tiene algo que hacer
+  const hayAcciones =
+    estadoActual === ESTADO_REGISTRADO ||
+    estadoActual === ESTADO_EN_CAMINO ||
+    estadoActual === ESTADO_LISTO;
+
+  // Textos del diálogo de confirmación según la acción solicitada
+  const dialogo =
+    {
+      aceptar: {
+        titulo: '¿Aceptar este pedido?',
+        mensaje: `El pedido ${pedido.numero_pedido} se enviará a cocina y su preparación quedará en manos del equipo.`,
+      },
+      despachar: {
+        titulo: '¿Despachar el pedido?',
+        mensaje: `El pedido ${pedido.numero_pedido} saldrá del local con ${repartidor} y el cliente podrá seguirlo en el mapa.`,
+      },
+      entregar: {
+        titulo: '¿Marcar como entregado?',
+        mensaje: `Se confirmará que el cliente recibió el pedido ${pedido.numero_pedido}.`,
+      },
+      correo: {
+        titulo: '¿Enviar la factura por correo?',
+        mensaje: `La factura del pedido ${pedido.numero_pedido} se enviará en PDF a ${pedido.correo_cliente}.`,
+      },
+    }[confirmacion] ?? {};
 
   return (
     <div className="pedido-detalle-page">
@@ -142,7 +243,8 @@ function PedidoDetallePage() {
               </span>
               {pedido.envio && (
                 <span className="factura-subvalor">
-                  <LocationOnIcon fontSize="small"/> {pedido.envio.direccion_texto}
+                  <LocationOnIcon fontSize="small" />{' '}
+                  {pedido.envio.direccion_texto}
                 </span>
               )}
             </div>
@@ -214,7 +316,7 @@ function PedidoDetallePage() {
               <div className="factura-cupones-lista">
                 {pedido.cupones.map((cupon) => (
                   <span key={cupon.id_cupon} className="factura-cupon-chip">
-                    <ConfirmationNumberIcon fontSize="small" /> {cupon.codigo} <small>({cupon.nombre})</small>
+                    🎟️ {cupon.codigo} <small>({cupon.nombre})</small>
                   </span>
                 ))}
               </div>
@@ -244,9 +346,7 @@ function PedidoDetallePage() {
               </div>
             )}
             <div className="resumen-fila resumen-total">
-              <span>
-                Total
-              </span>
+              <span>Total</span>
               <span>{formatoMoneda(pedido.monto_total)}</span>
             </div>
             {totalUSD != null && (
@@ -260,10 +360,37 @@ function PedidoDetallePage() {
             )}
           </div>
 
+          {/* ---------- Exportar la factura ---------- */}
+          <div className="pedido-exportar">
+            <Button
+              variant="outlined"
+              className="pedido-exportar-boton"
+              startIcon={<PictureAsPdfIcon />}
+              disabled={Boolean(factura)}
+              onClick={descargarFactura}
+            >
+              {factura === 'descargando'
+                ? 'Generando…'
+                : 'Descargar factura (PDF)'}
+            </Button>
+            <Button
+              variant="outlined"
+              className="pedido-exportar-boton"
+              startIcon={<EmailIcon />}
+              disabled={Boolean(factura)}
+              onClick={() => setConfirmacion('correo')}
+            >
+              {factura === 'enviando' ? 'Enviando…' : 'Enviar por correo'}
+            </Button>
+            <span className="pedido-exportar-nota">
+              Se envía al correo de la cuenta: {pedido.correo_cliente}
+            </span>
+          </div>
+
           {/* ---------- Acciones del encargado ---------- */}
-          {esPersonal && (estadoActual === 1 || estadoActual === 4) && (
+          {esPersonal && hayAcciones && (
             <div className="pedido-acciones">
-              {estadoActual === 1 && (
+              {estadoActual === ESTADO_REGISTRADO && (
                 <Button
                   variant="contained"
                   className="pedido-accion-aceptar"
@@ -272,7 +399,30 @@ function PedidoDetallePage() {
                   Aceptar pedido y enviar a cocina
                 </Button>
               )}
-              {estadoActual === 4 && (
+
+              {/* Un pedido a domicilio primero sale del local */}
+              {estadoActual === ESTADO_LISTO && esDomicilio && (
+                <>
+                  <TextField
+                    size="small"
+                    label="Repartidor asignado"
+                    value={repartidor}
+                    onChange={(e) => setRepartidor(e.target.value)}
+                    className="pedido-accion-repartidor"
+                  />
+                  <Button
+                    variant="contained"
+                    className="pedido-accion-aceptar"
+                    disabled={repartidor.trim().length < 3}
+                    onClick={() => setConfirmacion('despachar')}
+                  >
+                    Despachar pedido
+                  </Button>
+                </>
+              )}
+
+              {(estadoActual === ESTADO_EN_CAMINO ||
+                (estadoActual === ESTADO_LISTO && !esDomicilio)) && (
                 <Button
                   variant="contained"
                   className="pedido-accion-entregar"
@@ -284,6 +434,19 @@ function PedidoDetallePage() {
             </div>
           )}
         </div>
+
+        {/* ---------- Seguimiento del envío en el mapa ---------- */}
+        {destino && restaurante && (
+          <section className="pedido-mapa">
+            <h3>Seguimiento del envío</h3>
+            <MapaSeguimiento
+              restaurante={restaurante}
+              destino={destino}
+              envio={pedido.envio}
+              entregado={estadoActual === ESTADO_ENTREGADO}
+            />
+          </section>
+        )}
 
         {/* ---------- Seguimiento ---------- */}
         <aside className="pedido-seguimiento">
@@ -317,16 +480,8 @@ function PedidoDetallePage() {
 
       <ConfirmDialog
         open={confirmacion !== null}
-        titulo={
-          confirmacion === 'aceptar'
-            ? '¿Aceptar este pedido?'
-            : '¿Marcar como entregado?'
-        }
-        mensaje={
-          confirmacion === 'aceptar'
-            ? `El pedido ${pedido.numero_pedido} se enviará a cocina y su preparación quedará en manos del equipo.`
-            : `Se confirmará que el cliente recibió el pedido ${pedido.numero_pedido}.`
-        }
+        titulo={dialogo.titulo}
+        mensaje={dialogo.mensaje}
         textoConfirmar={procesando ? 'Procesando…' : 'Confirmar'}
         onConfirmar={ejecutarAccion}
         onCancelar={() => setConfirmacion(null)}
