@@ -90,17 +90,43 @@ export const precioConDescuento = (precioBase, tipoDescuento, valor) => {
   return final < 0 ? 0 : final;
 };
 
+/**
+ * Cuando la respuesta se pidió como blob (por ejemplo el PDF de la factura),
+ * el mensaje de error también llega como blob y hay que leerlo para poder
+ * mostrarlo.
+ */
+export const extraerErrorBlob = async (
+  error,
+  mensajePorDefecto = 'Ocurrió un error',
+) => {
+  const data = error?.response?.data;
+  if (!(data instanceof Blob)) return extraerErrorAPI(error, mensajePorDefecto);
+  try {
+    const contenido = JSON.parse(await data.text());
+    if (typeof contenido === 'string') return contenido;
+    return contenido?.mensaje || mensajePorDefecto;
+  } catch {
+    return mensajePorDefecto;
+  }
+};
+
 export const extraerErrorAPI = (
   error,
   mensajePorDefecto = 'Ocurrió un error',
 ) => {
   if (!error) return mensajePorDefecto;
-  const data = error.response?.data;
+  // Sin respuesta del servidor: Apache apagado, ruta equivocada o CORS
+  if (!error.response) {
+    return 'No se pudo conectar con el servidor. Verifique que el servicio esté disponible.';
+  }
+  const data = error.response.data;
   if (typeof data === 'string') return data;
   if (data?.errores) {
     const primero = Object.values(data.errores)[0];
     if (typeof primero === 'string') return primero;
   }
   if (data?.mensaje) return data.mensaje;
-  return error.response?.statusText || mensajePorDefecto;
+  // El enrutador devuelve los errores del servidor en la propiedad result
+  if (typeof data?.result === 'string') return data.result;
+  return error.response.statusText || mensajePorDefecto;
 };

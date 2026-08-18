@@ -465,6 +465,15 @@ function CarritoPage() {
           ? `¡Pedido registrado! Vuelto: ${formatoMoneda(data.vuelto)}`
           : '¡Pedido registrado correctamente!',
       );
+      // La factura sale por correo sola al confirmar el pedido
+      if (data.factura_enviada) {
+        toast.success(`Factura enviada a ${data.factura_correo}`);
+      } else {
+        toast(
+          'El pedido quedó registrado, pero no se pudo enviar la factura por ' +
+            'correo. Puede descargarla desde el detalle del pedido.',
+        );
+      }
       navigate(`/pedidos/${data.id_pedido}`);
     } catch (error) {
       toast.error(extraerErrorAPI(error, 'No se pudo registrar el pedido'));

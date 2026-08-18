@@ -11,5 +11,11 @@ return [
     'RESTAURANTE_LAT'=>10.012001,
     'RESTAURANTE_LNG'=>-84.206440,
     // Velocidad promedio estimada del repartidor, para calcular la duración del envío
-    'VELOCIDAD_REPARTO_KMH'=>25
+    'VELOCIDAD_REPARTO_KMH'=>25,
+    // Envío de facturas por correo (PHPMailer sobre el SMTP de Gmail).
+    'CORREO_HOST'=>'smtp.gmail.com',
+    'CORREO_PUERTO'=>587,
+    'CORREO_USUARIO'=>'juerguencalvo@gmail.com',
+    'CORREO_CLAVE'=>'vztz qrjb psft pqyl',
+    'CORREO_REMITENTE'=>'CornApp'
 ];

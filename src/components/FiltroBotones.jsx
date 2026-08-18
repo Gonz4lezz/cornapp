@@ -1,11 +1,6 @@
 import PropTypes from 'prop-types';
 import './FiltroBotones.css';
 
-/**
- * Filtro en forma de botones: todas las opciones quedan a la vista y se
- * cambian con un solo clic, sin tener que desplegar un combo box.
- * El valor vacío ('') representa la opción "todos".
- */
 function FiltroBotones({ etiqueta, opciones, valor, onCambio }) {
   return (
     <div className="filtro-botones">

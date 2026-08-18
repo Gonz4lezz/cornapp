@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE = 'http://localhost:81/cornapp';
+export const API_BASE = 'http://localhost:81/cornapp-project';
 
 // Client ID de Google para el inicio de sesión (Google Identity Services)
 export const GOOGLE_CLIENT_ID =
@@ -147,6 +147,14 @@ export const usuarioService = {
 
 export const dashboardService = {
   get: () => api.get('/DashboardController'),
+};
+
+export const facturaService = {
+  // El PDF llega como binario, por eso se pide como blob
+  descargar: (idPedido) =>
+    api.get(`/FacturaController/descargar/${idPedido}`, {
+      responseType: 'blob',
+    }),
 };
 
 export const pedidoService = {

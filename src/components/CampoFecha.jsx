@@ -10,12 +10,6 @@ const fechaDeEjemplo = () =>
     year: 'numeric',
   }).format(new Date());
 
-/**
- * Campo de fecha que en lugar del "dd/mm/aaaa" del navegador muestra una
- * fecha de ejemplo mientras está vacío. Se logra dejándolo como campo de
- * texto (el único que admite un placeholder propio) hasta que el usuario
- * lo enfoca: ahí vuelve a ser un campo de fecha con su calendario.
- */
 function CampoFecha({ value, onChange, ...props }) {
   const [enfocado, setEnfocado] = useState(false);
   const comoTexto = !enfocado && !value;
@@ -25,7 +19,7 @@ function CampoFecha({ value, onChange, ...props }) {
       type={comoTexto ? 'text' : 'date'}
       value={value}
       onChange={onChange}
-      placeholder={`Ej. ${fechaDeEjemplo()}`}
+      placeholder={`${fechaDeEjemplo()}`}
       onFocus={() => setEnfocado(true)}
       onBlur={() => setEnfocado(false)}
       slotProps={{ inputLabel: { shrink: true } }}

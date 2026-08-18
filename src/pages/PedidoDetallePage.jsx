@@ -2,11 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Button, TextField } from '@mui/material';
-import { pedidoService, tipoCambioService } from '../services/api';
+import {
+  facturaService,
+  pedidoService,
+  tipoCambioService,
+} from '../services/api';
 import {
   formatoMoneda,
   formatoFechaHora,
   extraerErrorAPI,
+  extraerErrorBlob,
 } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -14,6 +19,8 @@ import MapaSeguimiento from '../components/MapaSeguimiento';
 import './PedidosPage.css';
 import './PedidoDetallePage.css';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 
 const claseEstado = (nombre) =>
   `pedido-estado pedido-estado-${String(nombre)
@@ -36,6 +43,8 @@ function PedidoDetallePage() {
   const [restaurante, setRestaurante] = useState(null);
   const [repartidor, setRepartidor] = useState('');
   const [procesando, setProcesando] = useState(false);
+  // Bloquea el botón mientras el servidor arma el PDF
+  const [descargando, setDescargando] = useState(false);
 
   const cargar = useCallback(async () => {
     try {
@@ -60,6 +69,30 @@ function PedidoDetallePage() {
       .then(({ data }) => setRestaurante(data.restaurante ?? null))
       .catch(() => setRestaurante(null));
   }, [cargar]);
+
+  // Descarga el PDF que arma el servidor y lo guarda en el equipo
+  const descargarFactura = async () => {
+    setDescargando(true);
+    try {
+      const { data } = await facturaService.descargar(pedido.id_pedido);
+      const url = URL.createObjectURL(
+        new Blob([data], { type: 'application/pdf' }),
+      );
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = `FACTURA-${pedido.numero_pedido}.pdf`;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      // Se libera la memoria del blob una vez iniciada la descarga
+      URL.revokeObjectURL(url);
+      toast.success('Factura descargada');
+    } catch (err) {
+      toast.error(await extraerErrorBlob(err, 'No se pudo generar la factura'));
+    } finally {
+      setDescargando(false);
+    }
+  };
 
   const ejecutarAccion = async () => {
     setProcesando(true);
@@ -115,6 +148,23 @@ function PedidoDetallePage() {
     estadoActual === ESTADO_REGISTRADO ||
     estadoActual === ESTADO_EN_CAMINO ||
     estadoActual === ESTADO_LISTO;
+
+  // Textos del diálogo de confirmación según la acción solicitada
+  const dialogo =
+    {
+      aceptar: {
+        titulo: '¿Desea aceptar este pedido?',
+        mensaje: `El pedido ${pedido.numero_pedido} se enviará a cocina y su preparación quedará en manos del equipo.`,
+      },
+      despachar: {
+        titulo: '¿Desea despachar el pedido?',
+        mensaje: `El pedido ${pedido.numero_pedido} saldrá del local con ${repartidor} y el cliente podrá seguirlo en el mapa.`,
+      },
+      entregar: {
+        titulo: '¿Desea marcar como entregado?',
+        mensaje: `Se confirmará que el cliente recibió el pedido ${pedido.numero_pedido}.`,
+      },
+    }[confirmacion] ?? {};
 
   return (
     <div className="pedido-detalle-page">
@@ -245,7 +295,7 @@ function PedidoDetallePage() {
               <div className="factura-cupones-lista">
                 {pedido.cupones.map((cupon) => (
                   <span key={cupon.id_cupon} className="factura-cupon-chip">
-                    🎟️ {cupon.codigo} <small>({cupon.nombre})</small>
+                    <ConfirmationNumberIcon fontSize="small" /> {cupon.codigo} <small>({cupon.nombre})</small>
                   </span>
                 ))}
               </div>
@@ -287,6 +337,19 @@ function PedidoDetallePage() {
                 }).format(totalUSD)}
               </div>
             )}
+          </div>
+
+          {/* ---------- Exportar la factura ---------- */}
+          <div className="pedido-exportar">
+            <Button
+              variant="outlined"
+              className="pedido-exportar-boton"
+              startIcon={<PictureAsPdfIcon />}
+              disabled={descargando}
+              onClick={descargarFactura}
+            >
+              {descargando ? 'Generando…' : 'Descargar factura (PDF)'}
+            </Button>
           </div>
 
           {/* ---------- Acciones del encargado ---------- */}
@@ -382,20 +445,8 @@ function PedidoDetallePage() {
 
       <ConfirmDialog
         open={confirmacion !== null}
-        titulo={
-          confirmacion === 'aceptar'
-            ? '¿Desea aceptar este pedido?'
-            : confirmacion === 'despachar'
-              ? '¿Desea despachar el pedido?'
-              : '¿Desea marcar como entregado?'
-        }
-        mensaje={
-          confirmacion === 'aceptar'
-            ? `El pedido ${pedido.numero_pedido} se enviará a cocina y su preparación quedará en manos del equipo.`
-            : confirmacion === 'despachar'
-              ? `El pedido ${pedido.numero_pedido} saldrá del local con ${repartidor} y el cliente podrá seguirlo en el mapa.`
-              : `Se confirmará que el cliente recibió el pedido ${pedido.numero_pedido}.`
-        }
+        titulo={dialogo.titulo}
+        mensaje={dialogo.mensaje}
         textoConfirmar={procesando ? 'Procesando…' : 'Confirmar'}
         onConfirmar={ejecutarAccion}
         onCancelar={() => setConfirmacion(null)}

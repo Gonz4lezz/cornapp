@@ -44,11 +44,7 @@ function ClicEnMapa({ onMarcar }) {
 
 ClicEnMapa.propTypes = { onMarcar: PropTypes.func.isRequired };
 
-/**
- * Mapa para elegir la dirección de entrega. Al abrirse intenta ubicar
- * automáticamente al usuario; si no lo logra, queda el botón para
- * reintentarlo. En cualquier caso se puede marcar el punto con un clic.
- */
+
 function MapaDireccion({ restaurante, punto, onCambio, alcanceKm }) {
   const [ubicando, setUbicando] = useState(false);
   const intentoAutomatico = useRef(false);

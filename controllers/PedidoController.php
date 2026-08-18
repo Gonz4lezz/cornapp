@@ -279,10 +279,36 @@ class PedidoController
         }
 
         $this->carritoModel->vaciar($usuario->id_usuario);
+
+        // Al confirmar el pedido se le manda la factura al cliente. Si el
+        // correo falla, el pedido igual queda registrado: solo se avisa en
+        // la respuesta para que la pantalla lo informe.
+        $factura = $this->enviarFactura($idPedido);
+
         $this->response->status(201)->toJSON([
             'id_pedido' => $idPedido,
             'vuelto' => $pago['vuelto'],
+            'factura_enviada' => $factura['ok'],
+            'factura_correo' => $factura['correo'],
         ], 'Pedido registrado correctamente');
+    }
+
+    /**
+     * Manda la factura del pedido recién confirmado. Cualquier problema con
+     * el correo se reporta, pero nunca tumba el registro del pedido.
+     */
+    private function enviarFactura($idPedido)
+    {
+        try {
+            $pedido = $this->model->getDetalle($idPedido);
+            if (!$pedido) {
+                return ['ok' => false, 'correo' => null];
+            }
+            $resultado = Correo::enviarFactura($pedido);
+            return ['ok' => $resultado['ok'], 'correo' => $resultado['correo']];
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'correo' => null];
+        }
     }
 
     // POST /PedidoController/aceptar — el encargado acepta y envía a cocina
@@ -407,8 +433,7 @@ class PedidoController
 
     /**
      * Distancia en kilómetros entre el local y un punto, con la fórmula de
-     * Haversine (distancia sobre la superficie terrestre entre dos
-     * coordenadas). No depende de ningún servicio externo.
+     * Haversine. No depende de ningún servicio externo.
      */
     private function distanciaKm($latitud, $longitud)
     {

@@ -16,6 +16,8 @@ require_once "controllers/core/MySqlConnect.php";
 require_once "controllers/core/Request.php";
 require_once "controllers/core/Response.php";
 require_once "controllers/core/Auth.php";
+require_once "controllers/core/Correo.php";
+require_once "controllers/core/FacturaPDF.php";
 
 /***--- Agregar todos los modelos*/
 require_once "models/ProductoModel.php";
@@ -48,6 +50,7 @@ require_once "controllers/CocinaController.php";
 require_once "controllers/TipoCambioController.php";
 require_once "controllers/UsuarioController.php";
 require_once "controllers/DashboardController.php";
+require_once "controllers/FacturaController.php";
 
 
 //Enrutador
